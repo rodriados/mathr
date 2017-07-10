@@ -8,11 +8,12 @@
  */
 namespace Mathr;
 
-use Mathr\Exception\MismatchedParenthesesException;
+use SplQueue;
 use SplStack;
 use Mathr\Parser\Token;
 use Mathr\Parser\Tokenizer;
 use Mathr\Exception\UnexpectedTokenException;
+use Mathr\Exception\MismatchedParenthesesException;
 
 class Parser
 {
@@ -27,8 +28,6 @@ class Parser
 	    '=' => 0
 	];
 	
-	protected static $unary = ['+', '-'];
-	
 	/**
 	 * @var SplStack
 	 */
@@ -40,9 +39,9 @@ class Parser
 	private $tokenizer;
 	
 	/**
-	 * @var Expression
+	 * @var SplQueue
 	 */
-	private $expression;
+	private $output;
 	
 	/**
 	 * @var bool
@@ -60,20 +59,10 @@ class Parser
 		$this->inFunction = false;
 	}
 	
-	public function parse(string $expr)
-	{
-		$expr = explode(';', trim($expr));
-		
-		foreach($expr as $command)
-			$exprs[] = $this->doParse(trim($command));
-		
-		return $exprs ?? [];
-	}
-	
-	private function doParse(string $expr) : Expression
+	public function parse(string $expr) : Expression
 	{
 		$this->tokenizer = new Tokenizer($expr);
-		$this->expression = new Expression;
+		$this->output = new SplQueue;
 		$this->stack = new SplStack;
 		$this->expectingOperator = false;
 		$this->inFunction = false;
@@ -86,10 +75,10 @@ class Parser
 				throw new MismatchedParenthesesException($this->stack->top(),-1);
 			}
 			
-			$this->expression->push($this->stack->pop());
+			$this->output->push($this->stack->pop());
 		}
 		
-		return $this->expression;
+		return new Expression($this->output);
 	}
 	
 	private function receive(Token $token, int $position)
@@ -101,7 +90,7 @@ class Parser
 			if($this->inFunction)
 				$this->incrementFunction();
 			
-			$this->expression->push($token);
+			$this->output->push($token);
 			$this->expectingOperator = true;
 			return;
 		}
@@ -113,7 +102,7 @@ class Parser
 			if($this->inFunction)
 				$this->incrementFunction();
 			
-			$this->expression->push($token);
+			$this->output->push($token);
 			$this->expectingOperator = true;
 			return;
 		}
@@ -133,7 +122,7 @@ class Parser
 		}
 		
 		if($token->is(Token::OPERATOR)) {
-			if(!$this->expectingOperator && in_array($token->data(), self::$unary))
+			if(!$this->expectingOperator && in_array($token->data(), ['+','-']))
 				$token = Token::operator("0{$token}", Token::RIGHT);
 			elseif(!$this->expectingOperator || $this->inFunction)
 				throw new UnexpectedTokenException($token, $position);
@@ -144,7 +133,7 @@ class Parser
 				self::$precedence[$this->stack->top()->data()] >= self::$precedence[$token->data()] &&
 			    !$token->is(Token::LEFT)
 			) {
-				$this->expression->push($this->stack->pop());
+				$this->output->push($this->stack->pop());
 			}
 			
 			$this->stack->push($token);
@@ -166,7 +155,7 @@ class Parser
 				!$this->stack->isEmpty() &&
 			    !$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
 			) {
-				$this->expression->push($this->stack->pop());
+				$this->output->push($this->stack->pop());
 			}
 			
 			if($this->stack->isEmpty())
@@ -175,7 +164,7 @@ class Parser
 			$popped = $this->stack->pop();
 			
 			if($popped->is(Token::FUNCTION))
-				$this->expression->push($popped);
+				$this->output->push($popped);
 			
 			$this->expectingOperator = true;
 			$this->inFunction = false;
@@ -190,13 +179,13 @@ class Parser
 				!$this->stack->isEmpty() &&
 				!$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
 			) {
-				$this->expression->push($this->stack->pop());
+				$this->output->push($this->stack->pop());
 			}
 			
 			if($this->stack->isEmpty())
-				throw new UnexpectedTokenException;
+				throw new UnexpectedTokenException($token, $position);
 			
-			$this->stack->push($this->expression->pop());
+			$this->stack->push($this->output->pop());
 			$this->expectingOperator = false;
 			$this->inFunction = true;
 			return;
