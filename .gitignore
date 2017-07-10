@@ -1,0 +1,7 @@
+*~
+*.bak
+Thumbs.db
+desktop.ini
+.DS_Store
+.idea
+index.php
