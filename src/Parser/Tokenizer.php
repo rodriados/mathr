@@ -28,7 +28,8 @@ class Tokenizer
 			'|(,)'.                         # Group 6: Comma
 			'/',
 			$expression,
-			$this->data
+			$this->data,
+			PREG_PATTERN_ORDER|PREG_OFFSET_CAPTURE
 		);
 	}
 	
@@ -38,14 +39,15 @@ class Tokenizer
 	 */
 	public function current() : Token
 	{
-		if($data = $this->data[1][$this->position]) {
+		if(($data = $this->data[1][$this->position][0]) !== "") {
 			return Token::number($data);
 		}
 		
-		if($data = $this->data[2][$this->position]) {
+		if($data = $this->data[2][$this->position][0]) {
 			if(
-				$this->position + 1 < count($this->data[5]) &&
-			    $this->data[5][$this->position + 1] == '('
+				($this->position + 1) < count($this->data[5]) &&
+			    is_array($this->data[5][$this->position + 1]) &&
+				$this->data[5][$this->position + 1][0] == '('
 			) {
 				$this->next();
 				return Token::function($data);
@@ -54,19 +56,19 @@ class Tokenizer
 			return Token::variable('$'.$data);
 		}
 		
-		if($data = $this->data[3][$this->position]) {
+		if($data = $this->data[3][$this->position][0]) {
 			return Token::operator($data, Token::RIGHT);
 		}
 		
-		if($data = $this->data[4][$this->position]) {
+		if($data = $this->data[4][$this->position][0]) {
 			return Token::operator($data, Token::LEFT);
 		}
 		
-		if($data = $this->data[5][$this->position]) {
+		if($data = $this->data[5][$this->position][0]) {
 			return Token::parentheses($data == '(');
 		}
 		
-		if($data = $this->data[6][$this->position]) {
+		if($data = $this->data[6][$this->position][0]) {
 			return Token::comma();
 		}
 		
@@ -85,15 +87,15 @@ class Tokenizer
 	/**
 	 * @return mixed
 	 */
-	public function key()
+	public function key() : int
 	{
-		return $this->position;
+		return $this->data[0][$this->position][1];
 	}
 	
 	/**
 	 * @return mixed
 	 */
-	public function valid()
+	public function valid() : bool
 	{
 		return $this->position < count($this->data[0]);
 	}

@@ -17,6 +17,8 @@ use Mathr\Exception\UnexpectedTokenException;
 class Parser
 {
 	protected static $precedence = [
+		'0+' => 6,
+		'0-' => 6,
 		'^' => 4,
 		'*' => 3,
 		'/' => 3,
@@ -24,6 +26,8 @@ class Parser
 		'-' => 2,
 	    '=' => 0
 	];
+	
+	protected static $unary = ['+', '-'];
 	
 	/**
 	 * @var SplStack
@@ -71,13 +75,15 @@ class Parser
 		$this->tokenizer = new Tokenizer($expr);
 		$this->expression = new Expression;
 		$this->stack = new SplStack;
+		$this->expectingOperator = false;
+		$this->inFunction = false;
 		
-		foreach($this->tokenizer as $token)
-			$this->receive($token);
+		foreach($this->tokenizer as $position => $token)
+			$this->receive($token, $position);
 
 		while(!$this->stack->isEmpty()) {
 			if($this->stack->top()->is(Token::PARENTHESES|Token::LEFT)) {
-				throw new MismatchedParenthesesException;
+				throw new MismatchedParenthesesException($this->stack->top(),-1);
 			}
 			
 			$this->expression->push($this->stack->pop());
@@ -86,11 +92,11 @@ class Parser
 		return $this->expression;
 	}
 	
-	private function receive(Token $token)
+	private function receive(Token $token, int $position)
 	{
 		if($token->is(Token::NUMBER)) {
 			if($this->expectingOperator)
-				throw new UnexpectedTokenException;
+				throw new UnexpectedTokenException($token, $position);
 			
 			if($this->inFunction)
 				$this->incrementFunction();
@@ -127,8 +133,10 @@ class Parser
 		}
 		
 		if($token->is(Token::OPERATOR)) {
-			if(!$this->expectingOperator || $this->inFunction)
-				throw new UnexpectedTokenException;
+			if(!$this->expectingOperator && in_array($token->data(), self::$unary))
+				$token = Token::operator("0{$token}", Token::RIGHT);
+			elseif(!$this->expectingOperator || $this->inFunction)
+				throw new UnexpectedTokenException($token, $position);
 			
 			while(
 				!$this->stack->isEmpty() &&
@@ -162,7 +170,7 @@ class Parser
 			}
 			
 			if($this->stack->isEmpty())
-				throw new MismatchedParenthesesException;
+				throw new MismatchedParenthesesException($token, $position);
 			
 			$popped = $this->stack->pop();
 			
@@ -176,7 +184,7 @@ class Parser
 		
 		if($token->is(Token::COMMA)) {
 			if(!$this->expectingOperator || $this->inFunction)
-				throw new UnexpectedTokenException;
+				throw new UnexpectedTokenException($token, $position);
 			
 			while(
 				!$this->stack->isEmpty() &&
@@ -204,7 +212,7 @@ class Parser
 	
 	private function receiveMult()
 	{
-		$this->receive(Token::operator('*', Token::RIGHT));
+		$this->receive(Token::operator('*', Token::RIGHT), -1);
 	}
 	
 }

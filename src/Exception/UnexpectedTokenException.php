@@ -8,6 +8,15 @@
  */
 namespace Mathr\Exception;
 
+use Mathr\Parser\Token;
+
 class UnexpectedTokenException
 	extends \Exception
-{}
+{
+	public $token;
+	public $position;
+	
+	public function __construct(Token $token, int $position) {
+		parent::__construct("Unexpected {$token} in position {$position}");
+	}
+}
