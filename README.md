@@ -22,7 +22,7 @@ $mathr = new \Mathr\Evaluator;
 $mathr->evaluate("myvar = 10");
 $mathr->evaluate("fibonacci(0) = 0");
 $mathr->evaluate("fibonacci(1) = 1");
-$mathr->evaluate("fibonacci(x) = f(x - 1) + f(x - 2)");
+$mathr->evaluate("fibonacci(x) = fibonacci(x - 1) + fibonacci(x - 2)");
 $result = $mathr->evaluate("fibonacci(myvar)");
 echo $result->value(); // 55
 ```
