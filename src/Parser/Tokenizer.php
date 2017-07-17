@@ -20,12 +20,12 @@ class Tokenizer
 	public function __construct(string $expression)
 	{
 		preg_match_all(
-			'/([0-9]*\.[0-9]+|[0-9]+\.?)'.  # Group 1: Number literals
-			'|([a-zA-Z_][a-zA-Z0-9_]*)'.    # Group 2: Variables or functions
-			'|(\+|-|\/|\*)'.                # Group 3: Right to Left Operators
-			'|(\^|=)'.                      # Group 4: Left to Right Operators
-			'|(\(|\))'.                     # Group 5: Parentheses and comma
-			'|(,)'.                         # Group 6: Comma
+			'/([0-9]*\.[0-9]+|[0-9]+\.?)'.              # Group 1: Number literals
+			'|([a-zA-Zα-ωΑ-Ω_][a-zA-Zα-ωΑ-Ω0-9_]*)'.    # Group 2: Variables or functions
+			'|(\+|-|\/|\*)'.                            # Group 3: Right to Left Operators
+			'|(\^|=)'.                                  # Group 4: Left to Right Operators
+			'|(\(|\))'.                                 # Group 5: Parentheses and comma
+			'|(,)'.                                     # Group 6: Comma
 			'/',
 			$expression,
 			$this->data,

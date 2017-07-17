@@ -14,7 +14,7 @@ use Mathr\Node\NumberNode;
 class Evaluator
 {
 	protected $parser;
-	public $scope;
+	protected $scope;
 	
 	public function __construct()
 	{

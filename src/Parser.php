@@ -12,6 +12,7 @@ use SplQueue as Queue;
 use SplStack as Stack;
 use Mathr\Parser\Token;
 use Mathr\Parser\Tokenizer;
+use Mathr\Exception\ParseException;
 use Mathr\Exception\UnexpectedTokenException;
 use Mathr\Exception\MismatchedParenthesesException;
 
@@ -115,7 +116,7 @@ class Parser
 				$this->incrementFunction();
 			
 			$this->stack->push($token);
-			$this->stack->push(Token::number('0'));
+			$this->stack->push(Token::number(0));
 			$this->expectingOperator = false;
 			$this->inFunction = true;
 			return;
@@ -194,9 +195,17 @@ class Parser
 	
 	private function incrementFunction()
 	{
-		$value = (int)$this->stack->pop()->data();
-		$this->stack->push(Token::number($value + 1));
-		$this->inFunction = false;
+		for($i = 0; $i < $this->stack->count(); ++$i) {
+			if(!$this->stack[$i]->is(Token::NUMBER))
+				continue;
+			
+			$value = (int)$this->stack[$i]->data();
+			$this->stack[$i] = Token::number($value + 1);
+			$this->inFunction = false;
+			return;
+		}
+		
+		throw new ParseException;
 	}
 	
 	private function receiveMult()

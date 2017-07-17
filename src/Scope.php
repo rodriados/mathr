@@ -14,6 +14,7 @@ use Mathr\Node\VariableNode;
 use Mathr\Node\FunctionDeclNode;
 use Mathr\Exception\StackFrameException;
 use Mathr\Exception\StackOverflowException;
+use Mathr\Exception\SegmentationFaultException;
 
 class Scope
 {
@@ -80,7 +81,7 @@ class Scope
 		--$this->depth;
 	}
 	
-	protected function stackRetrieve(VariableNode $node)
+	public function stackRetrieve(VariableNode $node)
 	{
 		if($this->stack->isEmpty())
 			return false;
@@ -91,7 +92,7 @@ class Scope
 		$name = intval($name);
 		
 		if($name > $this->stack->top())
-			return false;
+			throw new SegmentationFaultException;
 		
 		return $this->stack[$name];
 	}

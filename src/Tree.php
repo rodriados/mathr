@@ -8,6 +8,8 @@
  */
 namespace Mathr;
 
+use Mathr\Node\NativeFunctionNode;
+use Mathr\Node\NativeVariableNode;
 use SplStack as Stack;
 use SplQueue as Queue;
 use Mathr\Parser\Token;
@@ -36,12 +38,18 @@ class Tree
 			}
 			
 			if($token->is(Token::VARIABLE)) {
-				$stack->push(VariableNode::fromToken($token, $stack));
+				$stack->push(in_array($token->data(), NativeVariableNode::LIST)
+					? NativeVariableNode::fromToken($token, $stack)
+					: VariableNode::fromToken($token, $stack)
+				);
 				continue;
 			}
 			
 			if($token->is(Token::FUNCTION)) {
-				$stack->push(FunctionDeclNode::fromToken($token, $stack));
+				$stack->push(in_array($token->data(), NativeFunctionNode::LIST)
+					? NativeFunctionNode::fromToken($token, $stack)
+					: FunctionDeclNode::fromToken($token, $stack)
+				);
 				continue;
 			}
 			

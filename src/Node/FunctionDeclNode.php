@@ -19,17 +19,6 @@ use Mathr\Exception\NoCompatibleDefinitionFoundException;
 class FunctionDeclNode
 	extends OperatorNode
 {
-	protected $scalar = [];
-	
-	public function __construct($value, SplStack $stack)
-	{
-		parent::__construct($value, $stack);
-		
-		foreach($this->argv as $id => $arg)
-			if($arg instanceof NumberNode)
-				$this->scalar[$id] = $arg->value();
-	}
-	
 	public function processBody(AbstractNode $body)
 	{
 		$stack = new SplStack;
