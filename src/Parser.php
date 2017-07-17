@@ -8,8 +8,8 @@
  */
 namespace Mathr;
 
-use SplQueue;
-use SplStack;
+use SplQueue as Queue;
+use SplStack as Stack;
 use Mathr\Parser\Token;
 use Mathr\Parser\Tokenizer;
 use Mathr\Exception\UnexpectedTokenException;
@@ -29,7 +29,7 @@ class Parser
 	];
 	
 	/**
-	 * @var SplStack
+	 * @var Stack
 	 */
 	private $stack;
 	
@@ -39,7 +39,7 @@ class Parser
 	private $tokenizer;
 	
 	/**
-	 * @var SplQueue
+	 * @var Queue
 	 */
 	private $output;
 	
@@ -59,11 +59,11 @@ class Parser
 		$this->inFunction = false;
 	}
 	
-	public function parse(string $expr) : Expression
+	public function parse(string $expr) : Tree
 	{
 		$this->tokenizer = new Tokenizer($expr);
-		$this->output = new SplQueue;
-		$this->stack = new SplStack;
+		$this->output = new Queue;
+		$this->stack = new Stack;
 		$this->expectingOperator = false;
 		$this->inFunction = false;
 		
@@ -78,7 +78,7 @@ class Parser
 			$this->output->push($this->stack->pop());
 		}
 		
-		return new Expression($this->output);
+		return new Tree($this->output);
 	}
 	
 	private function receive(Token $token, int $position)

@@ -8,10 +8,13 @@
  */
 namespace Mathr;
 
+use Mathr\Node\NullNode;
+use Mathr\Node\NumberNode;
+
 class Evaluator
 {
 	protected $parser;
-	protected $scope;
+	public $scope;
 	
 	public function __construct()
 	{
@@ -19,9 +22,9 @@ class Evaluator
 		$this->scope = new Scope;
 	}
 	
-	public function parse(string $expr)
+	public function evaluate(string $expr)
 	{
-		$expr = explode(';', $expr);
+		$expr = explode(';', trim($expr, ';'));
 		$return = [];
 		
 		foreach($expr as $command)
@@ -29,7 +32,11 @@ class Evaluator
 				->parse(trim($command))
 				->evaluate($this->scope);
 		
-		return $return;
+		foreach($return as &$ret)
+			if(!$ret instanceof NumberNode)
+				$ret = new NullNode;
+		
+		return $return[0];
 	}
 	
 }
