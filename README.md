@@ -44,7 +44,7 @@ The recommended way to install Mathr is via [Composer](http://getcomposer.org).
 ```json
 {
     "require": {
-        "rodriados/mathr": "dev/master"
+        "rodriados/mathr": "dev-master"
     }
 }
 ```
