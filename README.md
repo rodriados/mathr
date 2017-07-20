@@ -1,5 +1,7 @@
 # Mathr
-![license MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg) ![version beta](https://img.shields.io/badge/version-beta-green.svg)
+![license MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)
+![version beta](https://img.shields.io/badge/version-beta-green.svg)
+[![Build Status](https://travis-ci.org/rodriados/mathr.svg?branch=master)](https://travis-ci.org/rodriados/mathr)
 
 Mathr is a fast mathematical expression parser and calculator with some added juice.
 
