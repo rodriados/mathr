@@ -1,4 +1,5 @@
 The MIT License
+Mathr v1.0
 
 Copyright (c) 2017 Rodrigo Siqueira
 
