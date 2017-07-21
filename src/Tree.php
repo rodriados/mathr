@@ -1,15 +1,13 @@
 <?php
 /**
  * Mathr\Tree class file.
- * @package Parser
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
  * @copyright 2017 Rodrigo Siqueira
  */
 namespace Mathr;
 
-use Mathr\Node\NativeFunctionNode;
-use Mathr\Node\NativeVariableNode;
 use SplStack as Stack;
 use SplQueue as Queue;
 use Mathr\Parser\Token;
@@ -17,14 +15,21 @@ use Mathr\Node\NumberNode;
 use Mathr\Node\VariableNode;
 use Mathr\Node\OperatorNode;
 use Mathr\Node\FunctionDeclNode;
+use Mathr\Node\NativeFunctionNode;
+use Mathr\Node\NativeVariableNode;
 
 class Tree
 {
 	/**
-	 * @var Node\AbstractNode
+	 * Tree root.
+	 * @var Node\AbstractNode Tree's root node.
 	 */
 	protected $root;
 	
+	/**
+	 * Tree constructor.
+	 * @param Queue $queue Expression tokens in RPN format.
+	 */
 	public function __construct(Queue $queue)
 	{
 		$stack = new Stack;
@@ -62,6 +67,11 @@ class Tree
 		$this->root = $stack->pop();
 	}
 	
+	/**
+	 * Evaluates the expression tree and returns a value.
+	 * @param Scope $scope Storage for variables and functions.
+	 * @return Node\AbstractNode Resulting node after evaluation.
+	 */
 	public function evaluate(Scope $scope)
 	{
 		return $this->root->evaluate($scope);

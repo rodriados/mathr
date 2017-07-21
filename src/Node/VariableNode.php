@@ -16,20 +16,26 @@ use Mathr\Exception\UnknownSymbolException;
 class VariableNode
 	extends AbstractNode
 {
+	/**
+	 * VariableNode constructor.
+	 * @param string $name Name of the invoked variable.
+	 */
 	public function __construct(string $name)
 	{
 		$this->value = $name;
 	}
 	
+	/**
+	 * Changes this variable name to a stack frame parameter name.
+	 * @param int $sequence Stack offset, new variable name.
+	 */
 	public function mapToParam(int $sequence)
 	{
 		$this->value = "\${$sequence}";
 	}
 	
 	/**
-	 * @param Scope $scope
-	 * @return AbstractNode
-	 * @throws UnknownSymbolException
+	 * @inheritdoc
 	 */
 	public function evaluate(Scope $scope) : AbstractNode
 	{
@@ -40,9 +46,7 @@ class VariableNode
 	}
 	
 	/**
-	 * @param Token $token
-	 * @param SplStack $_
-	 * @return AbstractNode
+	 * @inheritdoc
 	 */
 	public static function fromToken(Token $token, SplStack $_) : AbstractNode
 	{

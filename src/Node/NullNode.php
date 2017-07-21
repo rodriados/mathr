@@ -15,20 +15,25 @@ use Mathr\Parser\Token;
 class NullNode
 	extends AbstractNode
 {
+	/**
+	 * NullNode constructor.
+	 */
 	public function __construct()
 	{
 		$this->value = null;
 	}
 	
 	/**
-	 * @param Scope $scope
-	 * @return AbstractNode
+	 * @inheritdoc
 	 */
 	public function evaluate(Scope $scope) : AbstractNode
 	{
 		return $this;
 	}
 	
+	/**
+	 * @inheritdoc
+	 */
 	public static function fromToken(Token $token, SplStack $stack) : AbstractNode
 	{
 		return new static;

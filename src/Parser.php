@@ -1,7 +1,7 @@
 <?php
 /**
  * Mathr\Parser class file.
- * @package Parser
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
  * @copyright 2017 Rodrigo Siqueira
@@ -18,6 +18,10 @@ use Mathr\Exception\MismatchedParenthesesException;
 
 class Parser
 {
+	/**
+	 * Operators precedence.
+	 * @var array Informs which operators should execute before the others.
+	 */
 	protected static $precedence = [
 		'0+' => 6,
 		'0-' => 6,
@@ -30,36 +34,50 @@ class Parser
 	];
 	
 	/**
-	 * @var Stack
+	 * Parsing operator stack.
+	 * @var Stack All operator are stacked before being sent to output.
 	 */
 	private $stack;
 	
 	/**
-	 * @var Tokenizer
+	 * Token iterator.
+	 * @var Tokenizer Extracts and iterates over the tokens of given expression.
 	 */
 	private $tokenizer;
 	
 	/**
-	 * @var Queue
+	 * Output queue.
+	 * @var Queue Stores operators and values in RPN format.
 	 */
 	private $output;
 	
 	/**
-	 * @var bool
+	 * Informs whether an operator is expected.
+	 * @var bool Checks if an operator should be the next token.
 	 */
 	private $expectingOperator;
 	
 	/**
-	 * @var bool
+	 * Informs whether the token is inside a function.
+	 * @var bool Checks if the function should be informed about parameter.
 	 */
 	private $inFunction;
 	
+	/**
+	 * Parser constructor.
+	 */
 	public function __construct()
 	{
 		$this->expectingOperator = false;
 		$this->inFunction = false;
 	}
 	
+	/**
+	 * Parses the expression and produces an output tree.
+	 * @param string $expr Expression to be parsed.
+	 * @return Tree Execution tree.
+	 * @throws MismatchedParenthesesException
+	 */
 	public function parse(string $expr) : Tree
 	{
 		$this->tokenizer = new Tokenizer($expr);
@@ -82,6 +100,13 @@ class Parser
 		return new Tree($this->output);
 	}
 	
+	/**
+	 * Process a received token.
+	 * @param Token $token Received token.
+	 * @param int $position Expression iterator position.
+	 * @throws MismatchedParenthesesException
+	 * @throws UnexpectedTokenException
+	 */
 	private function receive(Token $token, int $position)
 	{
 		if($token->is(Token::NUMBER)) {
@@ -98,7 +123,7 @@ class Parser
 		
 		if($token->is(Token::VARIABLE)) {
 			if($this->expectingOperator)
-				$this->receiveMult();
+				$this->receiveMult($position);
 			
 			if($this->inFunction)
 				$this->incrementFunction();
@@ -110,7 +135,7 @@ class Parser
 		
 		if($token->is(Token::FUNCTION)) {
 			if($this->expectingOperator)
-				$this->receiveMult();
+				$this->receiveMult($position);
 			
 			if($this->inFunction)
 				$this->incrementFunction();
@@ -144,7 +169,7 @@ class Parser
 		
 		if($token->is(Token::PARENTHESES|Token::LEFT)) {
 			if($this->expectingOperator)
-				$this->receiveMult();
+				$this->receiveMult($position);
 			
 			$this->stack->push($token);
 			$this->expectingOperator = false;
@@ -193,6 +218,10 @@ class Parser
 		}
 	}
 	
+	/**
+	 * Informs the stacked function it's got one more parameter.
+	 * @throws ParseException There are no functions stacked.
+	 */
 	private function incrementFunction()
 	{
 		for($i = 0; $i < $this->stack->count(); ++$i) {
@@ -208,9 +237,13 @@ class Parser
 		throw new ParseException;
 	}
 	
-	private function receiveMult()
+	/**
+	 * Sends the parser an implicit multiplication operator.
+	 * @param int $position Position that triggered implicit operator.
+	 */
+	private function receiveMult(int $position)
 	{
-		$this->receive(Token::operator('*', Token::RIGHT), -1);
+		$this->receive(Token::operator('*', Token::RIGHT), $position);
 	}
 	
 }

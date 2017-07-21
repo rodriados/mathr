@@ -19,14 +19,18 @@ class NativeVariableNode
 		'$e', '$inf', '$pi', '$π', '$phi', '$φ', '$psi', '$ψ'
 	];
 	
+	/**
+	 * NativeVariableNode constructor.
+	 * @param string $value Variable name.
+	 * @param SplStack $stack Operand stack.
+	 */
 	public function __construct(string $value, SplStack $stack)
 	{
 		$this->value = $value;
 	}
 	
 	/**
-	 * @param Scope $scope
-	 * @return AbstractNode
+	 * @inheritdoc
 	 */
 	public function evaluate(Scope $scope) : AbstractNode
 	{
@@ -48,9 +52,7 @@ class NativeVariableNode
 	}
 	
 	/**
-	 * @param Token $token
-	 * @param SplStack $stack
-	 * @return AbstractNode
+	 * @inheritdoc
 	 */
 	public static function fromToken(Token $token, SplStack $stack) : AbstractNode
 	{

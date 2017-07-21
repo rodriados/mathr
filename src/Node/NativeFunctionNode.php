@@ -24,6 +24,13 @@ class NativeFunctionNode
 		'sin', 'sinh', 'sqrt', 'tan', 'tanh'
 	];
 	
+	/**
+	 * Informs the number of parameters needed for each function, when it is
+	 * not the assumed value of 1. If a negative value is given, then this
+	 * function can receive more parameters but no less than the absolute value
+	 * informed. Positive values inform the exact number of required parameters.
+	 * @var int[] Needed parameters for functions.
+	 */
 	protected static $fargc = [
 		'hypot' => +2,
 		'log'   => -1,
@@ -35,6 +42,12 @@ class NativeFunctionNode
 		'rt'    => +2,
 	];
 	
+	/**
+	 * NativeFunctionNode constructor.
+	 * @param string $value Function name.
+	 * @param SplStack $stack Operand stack.
+	 * @throws IncorrectFunctionParametersException
+	 */
 	public function __construct(string $value, SplStack $stack)
 	{
 		parent::__construct($value, $stack);
@@ -45,8 +58,7 @@ class NativeFunctionNode
 	}
 	
 	/**
-	 * @param Scope $scope
-	 * @return AbstractNode
+	 * @inheritdoc
 	 */
 	public function evaluate(Scope $scope) : AbstractNode
 	{
@@ -58,6 +70,11 @@ class NativeFunctionNode
 		return new NumberNode($this->exec($argv));
 	}
 	
+	/**
+	 * Executes all native functions with the correct argument types.
+	 * @param array $argv Arguments to be sent to function.
+	 * @return int|float Evaluated value.
+	 */
 	protected function exec(array $argv)
 	{
 		static $func;

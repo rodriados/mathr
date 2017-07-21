@@ -1,7 +1,7 @@
 <?php
 /**
  * Mathr\Parser\Tokenizer class file.
- * @package Parser
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
  * @copyright 2017 Rodrigo Siqueira
@@ -14,9 +14,22 @@ use Mathr\Exception\UnknownTokenException;
 class Tokenizer
 	implements Iterator
 {
-	private $position = 0;
+	/**
+	 * Expression tokens in raw data format.
+	 * @var array Raw tokenizer data.
+	 */
 	private $data;
 	
+	/**
+	 * Current iterator position.
+	 * @var int Position being currently iterated.
+	 */
+	private $position = 0;
+	
+	/**
+	 * Tokenizer constructor.
+	 * @param string $expression Expression to be tokenized.
+	 */
 	public function __construct(string $expression)
 	{
 		preg_match_all(
@@ -34,8 +47,9 @@ class Tokenizer
 	}
 	
 	/**
+	 * Retuns the current iteration data.
+	 * @return mixed Currently iterated token.
 	 * @throws UnknownTokenException
-	 * @return mixed
 	 */
 	public function current() : Token
 	{
@@ -76,7 +90,8 @@ class Tokenizer
 	}
 	
 	/**
-	 * @return mixed
+	 * Advances the iteration position in one.
+	 * @return int The new iterator position.
 	 */
 	public function next()
 	{
@@ -85,7 +100,8 @@ class Tokenizer
 	}
 	
 	/**
-	 * @return mixed
+	 * Returns the current iteration key.
+	 * @return int Expression iteration position.
 	 */
 	public function key() : int
 	{
@@ -93,7 +109,8 @@ class Tokenizer
 	}
 	
 	/**
-	 * @return mixed
+	 * Informs whether the iterator is still valid.
+	 * @return bool Is the iterator valid?
 	 */
 	public function valid() : bool
 	{
@@ -101,7 +118,8 @@ class Tokenizer
 	}
 	
 	/**
-	 * @return mixed
+	 * Rewinds the iterator position to the first position.
+	 * @return bool It always succeeds.
 	 */
 	public function rewind()
 	{

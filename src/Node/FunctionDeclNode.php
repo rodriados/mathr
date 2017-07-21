@@ -19,6 +19,10 @@ use Mathr\Exception\NoCompatibleDefinitionFoundException;
 class FunctionDeclNode
 	extends OperatorNode
 {
+	/**
+	 * Substitutes parameters for stack frame variables.
+	 * @param AbstractNode $body Function execution body.
+	 */
 	public function processBody(AbstractNode $body)
 	{
 		$stack = new SplStack;
@@ -43,8 +47,7 @@ class FunctionDeclNode
 	}
 
 	/**
-	 * @param Scope $scope
-	 * @return AbstractNode
+	 * @inheritdoc
 	 * @throws UnknownSymbolException
 	 * @throws IncorrectFunctionParametersException
 	 * @throws NoCompatibleDefinitionFoundException
@@ -82,17 +85,15 @@ class FunctionDeclNode
 		if($heap->isEmpty())
 			throw new NoCompatibleDefinitionFoundException($this->value());
 		
-		$scope->stackUp($argv ?? []);
+		$scope->push($argv ?? []);
 		$value = $heap->top()->evaluate($scope);
-		$scope->stackDown();
+		$scope->pop();
 		
 		return $value;
 	}
 	
 	/**
-	 * @param Token $token
-	 * @param SplStack $stack
-	 * @return AbstractNode
+	 * @inheritdoc
 	 */
 	public static function fromToken(Token $token, SplStack $stack) : AbstractNode
 	{

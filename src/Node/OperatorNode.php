@@ -1,7 +1,7 @@
 <?php
 /**
  * Mathr\Node\OperatorNode class file.
- * @package Parser
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
  * @copyright 2017 Rodrigo Siqueira
@@ -26,6 +26,10 @@ class OperatorNode
 	const POW = '^';
 	const EQU = '=';
 	
+	/**
+	 * Informs how many operands each operator need.
+	 * @var int[] Operators' operands count.
+	 */
 	protected static $ops = [
 		self::POS => 1,
 	    self::NEG => 1,
@@ -37,9 +41,23 @@ class OperatorNode
 	    self::EQU => 2
 	];
 	
+	/**
+	 * Operator operands.
+	 * @var SplFixedArray Operands storage.
+	 */
 	protected $argv;
+	
+	/**
+	 * Operator operands count.
+	 * @var int Number of registered operands.
+	 */
 	protected $argc;
 	
+	/**
+	 * OperatorNode constructor.
+	 * @param string $value Operator name.
+	 * @param SplStack $stack Operands stack.
+	 */
 	public function __construct(string $value, SplStack $stack)
 	{
 		$this->value = $value;
@@ -53,9 +71,7 @@ class OperatorNode
 	}
 	
 	/**
-	 * @param Scope $scope
-	 * @return AbstractNode
-	 * @throws IncorrectFunctionParametersException
+	 * @inheritdoc
 	 */
 	public function evaluate(Scope $scope) : AbstractNode
 	{
@@ -153,9 +169,7 @@ class OperatorNode
 	}
 	
 	/**
-	 * @param Token $token
-	 * @param SplStack $stack
-	 * @return AbstractNode
+	 * @inheritdoc
 	 */
 	public static function fromToken(Token $token, SplStack $stack) : AbstractNode
 	{
