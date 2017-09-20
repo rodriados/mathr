@@ -6,3 +6,4 @@ desktop.ini
 .idea
 index.php
 *.phar
+build/
