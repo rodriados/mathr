@@ -1,15 +1,12 @@
 <?php
 /**
- * Mathr\Parser class file.
+ * Mathr\Evaluator class file.
  * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
  * @copyright 2017 Rodrigo Siqueira
  */
 namespace Mathr;
-
-use Mathr\Node\NullNode;
-use Mathr\Node\NumberNode;
 
 class Evaluator
 {
@@ -26,35 +23,38 @@ class Evaluator
 	protected $scope;
 	
 	/**
-	 * Evaluator constructor.
+	 * Mathr constructor.
+	 * This constructor simply initializes the scope and parser instances
+	 * needed for evaluating mathematical expressions.
 	 */
 	public function __construct()
 	{
-		$this->parser = new Parser;
 		$this->scope = new Scope;
+		$this->parser = new Parser;
 	}
 	
 	/**
 	 * Evaluates a mathematical expression, stores its definition or returns a
 	 * node as an expected value.
 	 * @param string $expr Expression to be evaluated.
-	 * @return Node\AbstractNode Evaluated expression value.
+	 * @return array Value of all numeric expressions.
 	 */
-	public function evaluate(string $expr)
+	public function evaluate(string $expr): array
 	{
 		$expr = explode(';', trim($expr, ';'));
 		$return = [];
+		$ret = [];
 		
 		foreach($expr as $command)
 			$return[] = $this->parser
 				->parse(trim($command))
 				->evaluate($this->scope);
 		
-		foreach($return as &$ret)
-			if(!$ret instanceof NumberNode)
-				$ret = new NullNode;
+		foreach($return as &$r)
+			if($r instanceof Node\NumberNode)
+				$ret[] = $r->value();
 		
-		return $return[0];
+		return $ret;
 	}
 	
 }

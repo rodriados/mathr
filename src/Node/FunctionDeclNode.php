@@ -16,9 +16,22 @@ use Mathr\Exception\UnknownSymbolException;
 use Mathr\Exception\IncorrectFunctionParametersException;
 use Mathr\Exception\NoCompatibleDefinitionFoundException;
 
-class FunctionDeclNode
-	extends OperatorNode
+class FunctionDeclNode extends OperatorNode
 {
+	/**
+	 * Represents this node as a string.
+	 * @return string Node's string representation.
+	 */
+	public function __toString()
+	{
+		$str = null;
+		
+		for($i = 0; $i < $this->argc; ++$i)
+			$str .= $this->argv[$i].' ';
+		
+		return $str.$this->argc.' '.$this->value;
+	}
+	
 	/**
 	 * Substitutes parameters for stack frame variables.
 	 * @param AbstractNode $body Function execution body.

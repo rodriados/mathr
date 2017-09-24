@@ -12,7 +12,6 @@ use SplStack;
 use SplFixedArray;
 use Mathr\Scope;
 use Mathr\Parser\Token;
-use Mathr\Exception\IncorrectFunctionParametersException;
 
 class OperatorNode
 	extends AbstractNode
@@ -68,6 +67,20 @@ class OperatorNode
 		
 		for($i = $this->argc - 1; $i >= 0; --$i)
 			$this->argv[$i] = $stack->pop();
+	}
+	
+	/**
+	 * Represents this node as a string.
+	 * @return string Node's string representation.
+	 */
+	public function __toString()
+	{
+		$str = null;
+		
+		for($i = 0; $i < $this->argc; ++$i)
+			$str .= $this->argv[$i].' ';
+		
+		return $str.$this->value;
 	}
 	
 	/**
