@@ -27,12 +27,12 @@ final class EvaluatorTest extends TestCase
 		$this->eval->evaluate("b = 10");
 		
 		$this->assertEquals(
-			$this->eval->evaluate("a")->value(),
+			$this->eval->evaluate("a")[0],
 			1024
 		);
 		
 		$this->assertEquals(
-			$this->eval->evaluate("b")->value(),
+			$this->eval->evaluate("b")[0],
 			10
 		);
 	}
@@ -42,7 +42,7 @@ final class EvaluatorTest extends TestCase
 		$this->eval->evaluate("f(x) = (x + 1) ^ 2");
 		
 		$this->assertEquals(
-			$this->eval->evaluate("f(3)")->value(),
+			$this->eval->evaluate("f(3)")[0],
 			16
 		);
 	}
@@ -54,7 +54,7 @@ final class EvaluatorTest extends TestCase
 		$this->eval->evaluate("fib(x) = fib(x - 1) + fib(x - 2)");
 		
 		$this->assertEquals(
-			$this->eval->evaluate("fib(10)")->value(),
+			$this->eval->evaluate("fib(10)")[0],
 			55
 		);
 	}
@@ -69,7 +69,7 @@ final class EvaluatorTest extends TestCase
 	public function testCanImplicitlyMultiply()
 	{
 		$this->assertEquals(
-			$this->eval->evaluate("3(4+2)")->value(),
+			$this->eval->evaluate("3(4+2)")[0],
 			18
 		);
 	}
@@ -77,7 +77,7 @@ final class EvaluatorTest extends TestCase
 	public function testKnowsOperatorPrecedence()
 	{
 		$this->assertEquals(
-			$this->eval->evaluate("3+4*5")->value(),
+			$this->eval->evaluate("3+4*5")[0],
 			23
 		);
 	}
@@ -89,12 +89,12 @@ final class EvaluatorTest extends TestCase
 		$this->testCanDeclareRecursiveFunction();
 		
 		$this->assertEquals(
-			$this->eval->evaluate("fib(b)")->value(),
+			$this->eval->evaluate("fib(b)")[0],
 			55
 		);
 		
 		$this->assertEquals(
-			$this->eval->evaluate("f(a)")->value(),
+			$this->eval->evaluate("f(a)")[0],
 			1050625
 		);
 	}
@@ -102,12 +102,12 @@ final class EvaluatorTest extends TestCase
 	public function testKnowsSomeMathConstants()
 	{
 		$this->assertEquals(
-			$this->eval->evaluate("pi")->value(),
+			$this->eval->evaluate("pi")[0],
 			M_PI
 		);
 		
 		$this->assertEquals(
-			$this->eval->evaluate("e")->value(),
+			$this->eval->evaluate("e")[0],
 			M_E
 		);
 	}
@@ -115,12 +115,12 @@ final class EvaluatorTest extends TestCase
 	public function testKnowsSomeCommomFunctions()
 	{
 		$this->assertEquals(
-			$this->eval->evaluate("sqrt(81)")->value(),
+			$this->eval->evaluate("sqrt(81)")[0],
 			9
 		);
 		
 		$this->assertEquals(
-			$this->eval->evaluate("log(8,2)")->value(),
+			$this->eval->evaluate("log(8,2)")[0],
 			3
 		);
 	}
@@ -130,7 +130,7 @@ final class EvaluatorTest extends TestCase
 		$this->testCanDeclareVariable();
 		
 		$this->assertEquals(
-			$this->eval->evaluate("log(a,2)")->value(),
+			$this->eval->evaluate("log(a,2)")[0],
 			10
 		);
 	}
