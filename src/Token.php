@@ -1,10 +1,10 @@
 <?php
 /**
  * Mathr\Token class file.
- * @package Zettacast
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
- * @copyright 2017 Rodrigo Siqueira
+ * @copyright 2017-2018 Rodrigo Siqueira
  */
 namespace Mathr;
 
@@ -68,14 +68,14 @@ class Token
 	 */
 	public function __toString(): string
 	{
-		return $this->data();
+		return $this->getData();
 	}
 	
 	/**
 	 * Returns token data.
-	 * @return string Token data.
+	 * @return string The token's data as a string.
 	 */
-	public function data(): string
+	public function getData(): string
 	{
 		return $this->data;
 	}
@@ -84,9 +84,18 @@ class Token
 	 * Returns the token's position.
 	 * @return int The token's position on the string.
 	 */
-	public function position(): int
+	public function getPosition(): int
 	{
 		return $this->position;
+	}
+	
+	/**
+	 * Returns the token's type.
+	 * @return int The token's type.
+	 */
+	public function getType(): int
+	{
+		return $this->type;
 	}
 	
 	/**
@@ -102,83 +111,83 @@ class Token
 	/**
 	 * Creates a token as a number type.
 	 * @param string $data Data to be held by token.
-	 * @param int $position The token's position.
+	 * @param int $pos The token's position.
 	 * @return Token Created token.
 	 */
-	public static function number(string $data, int $position): self
+	public static function number(string $data, int $pos): self
 	{
-		return new self($data, self::NUMBER, $position);
+		return new self($data, self::NUMBER, $pos);
 	}
 	
 	/**
 	 * Creates a token as a variable type.
 	 * @param string $data Data to be held by token.
-	 * @param int $position The token's position.
+	 * @param int $pos The token's position.
 	 * @return Token Created token.
 	 */
-	public static function variable(string $data, int $position): self
+	public static function variable(string $data, int $pos): self
 	{
-		return new self($data, self::VARIABLE, $position);
+		return new self($data, self::VARIABLE, $pos);
 	}
 	
 	/**
 	 * Creates a token as an operator type.
 	 * @param string $data Data to be held by token.
 	 * @param int $assoc Informs the operator associativity.
-	 * @param int $position The token's position.
+	 * @param int $pos The token's position.
 	 * @return Token Created token.
 	 */
-	public static function operator(string $data, int $assoc, int $position): self
+	public static function operator(string $data, int $assoc, int $pos): self
 	{
-		return new self($data, self::OPERATOR | $assoc, $position);
+		return new self($data, self::OPERATOR | $assoc, $pos);
 	}
 	
 	/**
 	 * Creates a token as a function type.
 	 * @param string $data Data to be held by token.
-	 * @param int $position The token's position.
+	 * @param int $pos The token's position.
 	 * @return Token Created token.
 	 */
-	public static function function(string $data, int $position): self
+	public static function function(string $data, int $pos): self
 	{
 		return new self(
 			$data,
 			self::FUNCTION | self::OPERATOR | self::PARENTHESES | self::LEFT,
-			$position
+			$pos
 		);
 	}
 	
 	/**
 	 * Creates a token as a parentheses type.
 	 * @param bool $opener Is the token a left parentheses?
-	 * @param int $position The token's position.
+	 * @param int $pos The token's position.
 	 * @return Token Created token.
 	 */
-	public static function paren(bool $opener, int $position): self
+	public static function paren(bool $opener, int $pos): self
 	{
 		return $opener
-			? new self('(', self::PARENTHESES | self::LEFT, $position)
-			: new self(')', self::PARENTHESES | self::RIGHT, $position);
+			? new self('(', self::PARENTHESES | self::LEFT, $pos)
+			: new self(')', self::PARENTHESES | self::RIGHT, $pos);
 	}
 	
 	/**
 	 * Creates a token as a comma type.
-	 * @param int $position The token's position.
+	 * @param int $pos The token's position.
 	 * @return Token Created token.
 	 */
-	public static function comma(int $position): self
+	public static function comma(int $pos): self
 	{
-		return new self(',', self::COMMA, $position);
+		return new self(',', self::COMMA, $pos);
 	}
 	
 	/**
 	 * Creates a token as an unknown type.
-	 * @param int $position The token's position.
+	 * @param int $pos The token's position.
 	 * @return Token Created unknown token.
 	 */
-	public static function unknown(int $position): self
+	public static function unknown(int $pos): self
 	{
-		return new self(',', self::UNKNOWN, $position);
+		return new self(',', self::UNKNOWN, $pos);
 	}
 	
 }

@@ -1,16 +1,14 @@
 <?php
 /**
  * Mathr\Tokenizer class file.
- * @package Zettacast
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
- * @copyright 2017 Rodrigo Siqueira
+ * @copyright 2017-2018 Rodrigo Siqueira
  */
 namespace Mathr;
 
-use Iterator;
-
-class Tokenizer implements Iterator
+class Tokenizer implements \Iterator
 {
 	/**
 	 * Expression tokens in raw data format.
@@ -22,7 +20,7 @@ class Tokenizer implements Iterator
 	 * Current iterator position.
 	 * @var int Position being currently iterated.
 	 */
-	private $position;
+	private $position = 0;
 	
 	/**
 	 * Tokenizer constructor.
@@ -32,20 +30,17 @@ class Tokenizer implements Iterator
 	{
 		preg_match_all(
 			'/([0-9]*\.[0-9]+|[0-9]+\.?)'.              # Group 1: Number literals
-			'|([a-zA-Zα-ωΑ-Ω_][a-zA-Zα-ωΑ-Ω0-9_]*)'.    # Group 2: Variables or functions
+			'|([A-Za-zα-ωΑ-Ω_][A-Za-z0-9α-ωΑ-Ω_]*)'.    # Group 2: Variables or functions
 			'|(\+|-|\/|\*)'.                            # Group 3: Right to Left Operators
 			'|(\^|=)'.                                  # Group 4: Left to Right Operators
-			'|(\(|\))'.                                 # Group 5: Parentheses and comma
+			'|(\(|\))'.                                 # Group 5: Parentheses
 			'|(,)'.                                     # Group 6: Comma
 			'|([^\s])'.                                 # Group 7: Unknown
-			'/',
+			'/u',
 			$expression,
-			$matches,
+			$this->data,
 			PREG_PATTERN_ORDER|PREG_OFFSET_CAPTURE
 		);
-		
-		$this->data = $matches;
-		$this->position = 0;
 	}
 	
 	/**
@@ -65,7 +60,7 @@ class Tokenizer implements Iterator
 		
 		if(isset($this->data[4][$position][0]))
 			return Token::operator($data, Token::LEFT, $char);
-
+		
 		if(isset($this->data[5][$position][0]))
 			return Token::paren($data == '(', $char);
 		
@@ -82,8 +77,8 @@ class Tokenizer implements Iterator
 			$this->next();
 			return Token::function($data, $char);
 		}
-			
-			return Token::variable($data, $char);
+		
+		return Token::variable($data, $char);
 		
 	}
 	
