@@ -1,32 +1,31 @@
 <?php
 /**
  * Mathr\Node\NullNode class file.
- * @package Parser
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
- * @copyright 2017 Rodrigo Siqueira
+ * @copyright 2017-2018 Rodrigo Siqueira
  */
 namespace Mathr\Node;
 
-use SplStack;
+use Mathr\Node;
 use Mathr\Scope;
-use Mathr\Parser\Token;
+use Mathr\Token;
 
-class NullNode
-	extends AbstractNode
+class NullNode extends Node
 {
 	/**
 	 * NullNode constructor.
 	 */
 	public function __construct()
 	{
-		$this->value = null;
+		parent::__construct(null);
 	}
 	
 	/**
 	 * @inheritdoc
 	 */
-	public function evaluate(Scope $scope) : AbstractNode
+	public function evaluate(Scope $scope): Node
 	{
 		return $this;
 	}
@@ -34,7 +33,7 @@ class NullNode
 	/**
 	 * @inheritdoc
 	 */
-	public static function fromToken(Token $token, SplStack $stack) : AbstractNode
+	public static function fromToken(Token $token, \SplStack $stack): Node
 	{
 		return new static;
 	}

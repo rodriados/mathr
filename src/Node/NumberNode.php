@@ -1,38 +1,37 @@
 <?php
 /**
  * Mathr\Node\NumberNode class file.
- * @package Parser
+ * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
- * @copyright 2017 Rodrigo Siqueira
+ * @copyright 2017-2018 Rodrigo Siqueira
  */
 namespace Mathr\Node;
 
-use SplStack;
-use Exception;
+use Mathr\Node;
 use Mathr\Scope;
-use Mathr\Parser\Token;
+use Mathr\Token;
+use Mathr\Exception\NodeException;
 
-class NumberNode
-	extends AbstractNode
+class NumberNode extends Node
 {
 	/**
 	 * NumberNode constructor.
-	 * @param float|int $value Value held by Node.
-	 * @throws Exception
+	 * @param mixed $value Value held by Node.
+	 * @throws NodeException
 	 */
 	public function __construct($value)
 	{
 		if(!is_numeric($value))
-			throw new Exception('NumberNode received a non-numeric value');
-			
-		$this->value = $value;
+			throw NodeException::invalidNumber($value);
+		
+		parent::__construct($value);
 	}
 	
 	/**
 	 * @inheritdoc
 	 */
-	public function evaluate(Scope $scope) : AbstractNode
+	public function evaluate(Scope $scope): Node
 	{
 		return $this;
 	}
@@ -40,23 +39,21 @@ class NumberNode
 	/**
 	 * Creates a new NumberNode from a string numeric representation.
 	 * @param string $data String to be instantiated as NumberNode.
-	 * @return AbstractNode New created node.
+	 * @return Node New created node.
 	 */
-	public static function fromString(string $data) : AbstractNode
+	public static function fromString(string $data) : Node
 	{
 		return new static(
-			strpos($data, '.') === false
-				? intval($data)
-				: doubleval($data)
+			strpos($data, '.') === false ? intval($data) : doubleval($data)
 		);
 	}
 	
 	/**
 	 * @inheritdoc
 	 */
-	public static function fromToken(Token $token, SplStack $stack) : AbstractNode
+	public static function fromToken(Token $token, \SplStack $stack): Node
 	{
-		return static::fromString($token->data());
+		return static::fromString($token->getData());
 	}
 	
 }

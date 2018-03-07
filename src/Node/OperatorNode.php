@@ -4,45 +4,50 @@
  * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
- * @copyright 2017 Rodrigo Siqueira
+ * @copyright 2017-2018 Rodrigo Siqueira
  */
 namespace Mathr\Node;
 
-use SplStack;
-use SplFixedArray;
+use Mathr\Node;
 use Mathr\Scope;
-use Mathr\Parser\Token;
+use Mathr\Token;
+use Mathr\Native;
 
-class OperatorNode
-	extends AbstractNode
+class OperatorNode extends Node
 {
-	const POS = '0+';
-	const NEG = '0-';
-	const SUM = '+';
-	const SUB = '-';
-	const MUL = '*';
-	const DIV = '/';
-	const POW = '^';
-	const EQU = '=';
-	
 	/**
 	 * Informs how many operands each operator need.
 	 * @var int[] Operators' operands count.
 	 */
-	protected static $ops = [
-		self::POS => 1,
-	    self::NEG => 1,
-	    self::SUM => 2,
-	    self::SUB => 2,
-		self::MUL => 2,
-	    self::DIV => 2,
-	    self::POW => 2,
-	    self::EQU => 2
+	const OP_ARGC = [
+		'0+' => 1,
+		'0-' => 1,
+		'+'  => 2,
+		'-'  => 2,
+		'*'  => 2,
+		'/'  => 2,
+		'^'  => 2,
+		'='  => 2,
+	];
+	
+	/**
+	 * Informs the operators' names.
+	 * @var string[] Operators' names.
+	 */
+	const OP_NAME = [
+		'0+' => '_pos_',
+		'0-' => '_neg_',
+		'+'  => '_sum_',
+		'-'  => '_sub_',
+		'*'  => '_mul_',
+		'/'  => '_div_',
+		'^'  => '_pow_',
+		'='  => '=',
 	];
 	
 	/**
 	 * Operator operands.
-	 * @var SplFixedArray Operands storage.
+	 * @var \SplFixedArray Operands storage.
 	 */
 	protected $argv;
 	
@@ -50,142 +55,58 @@ class OperatorNode
 	 * Operator operands count.
 	 * @var int Number of registered operands.
 	 */
-	protected $argc;
+	protected $argc = 0;
 	
 	/**
 	 * OperatorNode constructor.
-	 * @param string $value Operator name.
-	 * @param SplStack $stack Operands stack.
+	 * @param string $symbol The operator symbol.
+	 * @param \SplStack $stack The operands' stack.
 	 */
-	public function __construct(string $value, SplStack $stack)
+	public function __construct(string $symbol, \SplStack $stack = null)
 	{
-		$this->value = $value;
-		$this->argc = !array_key_exists($value, self::$ops)
-			? (int)$stack->pop()->value()
-			: self::$ops[$value];
-		$this->argv = new SplFixedArray($this->argc);
+		$this->argc = self::OP_ARGC[$symbol] ?? $this->argc;
+		$this->argv = new \SplFixedArray($this->argc);
 		
 		for($i = $this->argc - 1; $i >= 0; --$i)
 			$this->argv[$i] = $stack->pop();
-	}
-	
-	/**
-	 * Represents this node as a string.
-	 * @return string Node's string representation.
-	 */
-	public function __toString()
-	{
-		$str = null;
-		
-		for($i = 0; $i < $this->argc; ++$i)
-			$str .= $this->argv[$i].' ';
-		
-		return $str.$this->value;
+
+		parent::__construct(self::OP_NAME[$symbol] ?? $symbol);
 	}
 	
 	/**
 	 * @inheritdoc
 	 */
-	public function evaluate(Scope $scope) : AbstractNode
+	public function evaluate(Scope $scope): Node
 	{
 		$argv = clone $this->argv;
+		$isNum = true;
 		
-		if($this->value() != self::EQU)
-			foreach($argv as $id => $arg)
+		if($this->value != '=') {
+			foreach($argv as $id => $arg) {
 				$argv[$id] = $arg->evaluate($scope);
-		
-		if(
-			$this->value() == self::NEG &&
-			$argv[0] instanceof NumberNode
-		)
-			return new NumberNode(
-				-$argv[0]->value()
-			);
-		
-		if(
-			$this->value() == self::POS &&
-			$argv[0] instanceof NumberNode
-		)
-			return new NumberNode(
-				+$argv[0]->value()
-			);
-		
-		if(
-			$this->value() == '+' &&
-			$argv[0] instanceof NumberNode &&
-			$argv[1] instanceof NumberNode
-		)
-			return new NumberNode(
-				$argv[0]->value() + $argv[1]->value()
-			);
-		
-		if(
-			$this->value() == '-' &&
-			$argv[0] instanceof NumberNode &&
-			$argv[1] instanceof NumberNode
-		)
-			return new NumberNode(
-				$argv[0]->value() - $argv[1]->value()
-			);
-		
-		if(
-			$this->value() == '*' &&
-			$argv[0] instanceof NumberNode &&
-			$argv[1] instanceof NumberNode
-		)
-			return new NumberNode(
-				$argv[0]->value() * $argv[1]->value()
-			);
-		
-		if(
-			$this->value() == '/' &&
-			$argv[0] instanceof NumberNode &&
-			$argv[1] instanceof NumberNode
-		)
-			return new NumberNode(
-				$argv[0]->value() / $argv[1]->value()
-			);
-		
-		if(
-			$this->value() == '^' &&
-			$argv[0] instanceof NumberNode &&
-			$argv[1] instanceof NumberNode
-		)
-			return new NumberNode(
-				pow($argv[0]->value(), $argv[1]->value())
-			);
-
-		if(
-			$this->value() == '=' &&
-		    $argv[0] instanceof VariableNode
-		) {
-			if($argv[1]->value() == '=')
-				$argv[1] = $argv[1]->evaluate($scope);
+				$isNum = $isNum && $argv[$id] instanceof NumberNode;
+			}
 			
-			$scope->assign(...$argv);
-			return $argv[1];
+			return $isNum
+				? Native::{$this->value}(...$argv)
+				: $this;
 		}
 		
-		if(
-			$this->value() == '=' &&
-			$argv[0] instanceof FunctionDeclNode
-		) {
-			if($argv[1]->value() == '=')
-				$argv[1] = $argv[1]->evaluate($scope);
-			
-			$argv[0]->processBody($argv[1]);
-			$scope->assign(...$argv);
-			return $argv[1];
-		}
+		if($argv[1]->getValue() == '=')
+			$argv[1] = $argv[1]->evaluate($scope);
 		
-		return $this;
+		$argv[0] instanceof FunctionNode
+			? $scope->setFunction($argv[0]->processBody($argv[1]), $argv[1])
+			: $scope->setVariable($argv[0], $argv[1]);
+		
+		return $argv[1];
 	}
 	
 	/**
 	 * @inheritdoc
 	 */
-	public static function fromToken(Token $token, SplStack $stack) : AbstractNode
+	public static function fromToken(Token $token, \SplStack $stack): Node
 	{
-		return new static($token->data(), $stack);
+		return new static($token->getData(), $stack);
 	}
 }

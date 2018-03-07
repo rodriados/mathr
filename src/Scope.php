@@ -1,38 +1,38 @@
 <?php
 /**
- * Mathr\Parser class file.
+ * Mathr\Scope class file.
  * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
- * @copyright 2017 Rodrigo Siqueira
+ * @copyright 2017-2018 Rodrigo Siqueira
  */
 namespace Mathr;
 
-use SplStack;
-use Mathr\Node\AbstractNode;
+use Mathr\Node\NullNode;
+use Mathr\Node\NumberNode;
+use Mathr\Node\OperatorNode;
 use Mathr\Node\VariableNode;
-use Mathr\Node\FunctionDeclNode;
-use Mathr\Exception\StackFrameException;
-use Mathr\Exception\StackOverflowException;
-use Mathr\Exception\SegmentationFaultException;
+use Mathr\Node\FunctionNode;
+use Mathr\Node\NodeInterface;
+use Mathr\Exception\ScopeException;
 
 class Scope
 {
 	/**
 	 * List of declared variables.
-	 * @var AbstractNode[] Stores all declared variables in scope.
+	 * @var NodeInterface[] Stores all declared variables in scope.
 	 */
 	protected $var;
 	
 	/**
 	 * List of declared functions.
-	 * @var AbstractNode[] Stores all declared functions in scope.
+	 * @var NodeInterface[] Stores all declared functions in scope.
 	 */
 	protected $func;
 	
 	/**
 	 * Execution stack.
-	 * @var SplStack Creation of stack frames while executing functions.
+	 * @var \SplStack Creation of stack frames while executing functions.
 	 */
 	protected $stack;
 	
@@ -57,67 +57,76 @@ class Scope
 		$this->var = [];
 		$this->func = [];
 		
-		$this->stack = new SplStack;
+		$this->stack = new \SplStack;
 		$this->limit = $limit;
 		$this->depth = 0;
 	}
 	
 	/**
-	 * Assigns a value or block to a variable or function.
-	 * @param AbstractNode $target Name to be assigned.
-	 * @param AbstractNode $value Value or block being assigned.
+	 * Retrieves the value of a stored or global variable.
+	 * @param Node $name The variable being retrieved.
+	 * @return NodeInterface The search result.
 	 */
-	public function assign(AbstractNode $target, AbstractNode $value)
+	public function getVariable(Node $name): NodeInterface
 	{
-		if($target instanceof VariableNode)
-			$this->var[$target->value()] = $value;
+		if(isset($this->var[$name->getValue()]))
+			return $this->var[$name->getValue()];
 		
-		elseif($target instanceof FunctionDeclNode)
-			$this->func[$target->value()][] = [$target, $value];
+		if($value = $this->peek($name))
+			return $value;
+		
+		if(in_array($name->getValue(), Native::CONSTANT_LIST))
+			return new NumberNode(Native::CONSTANT[$name->getValue()]);
+		
+		return new NullNode;
 	}
 	
 	/**
-	 * Checks whether a name has been previously declared in this scope.
-	 * @param AbstractNode $node Name to be checked.
-	 * @return bool Is the name declared?
+	 * Stores a variable into the scope.
+	 * @param VariableNode $name The variable name.
+	 * @param NodeInterface $value The variable value.
 	 */
-	public function has(AbstractNode $node) : bool
+	public function setVariable(VariableNode $name, NodeInterface $value)
 	{
-		return
-			$node instanceof VariableNode && isset($this->var[$node->value()]) ||
-		    $node instanceof FunctionDeclNode && isset($this->func[$node->value()])
-		;
+		$this->var[$name->getValue()] = $value;
 	}
 	
 	/**
-	 * Retrieves a declared variable or function from the scope.
-	 * @param AbstractNode $node Name to be retrieved.
-	 * @return bool|mixed Value attached to retrieved name.
+	 * Retrieves a stored or global function.
+	 * @param FunctionNode $name The function being retrieved.
+	 * @return NodeInterface|array The search result.
 	 */
-	public function retrieve(AbstractNode $node)
+	public function getFunction(FunctionNode $name)
 	{
-		if(!$this->has($node))
-			return $node instanceof VariableNode
-				? $this->peek($node)
-				: false;
+		$name = $name->getValue();
 		
-		if($node instanceof VariableNode)
-			return $this->var[$node->value()] ?? false;
+		if(isset($this->func[$name]))
+			return $this->func[$name];
 		
-		if($node instanceof FunctionDeclNode)
-			return $this->func[$node->value()] ?? false;
+		if(in_array($name, Native::FUNCTION_LIST))
+			return new OperatorNode($name);
 		
-		return false;
+		return new NullNode;
 	}
 	
 	/**
-	 * Pops a frame from execution stack.
-	 * @throws StackFrameException There are no frames in stack.
+	 * Stores a function definition into the scope.
+	 * @param FunctionNode $decl The function declaration.
+	 * @param NodeInterface $block The function block.
+	 */
+	public function setFunction(FunctionNode $decl, NodeInterface $block)
+	{
+		$this->func[$decl->getValue()][] = [$decl, $block];
+	}
+	
+	/**
+	 * Pops a frame from execu$nametion stack.
+	 * @throws ScopeException There are no frames in stack.
 	 */
 	public function pop()
 	{
 		if($this->stack->isEmpty())
-			throw new StackFrameException;
+			throw ScopeException::stackFrame();
 		
 		$count = $this->stack->pop();
 		
@@ -129,22 +138,22 @@ class Scope
 	
 	/**
 	 * Peeks at value in current stack frame.
-	 * @param VariableNode $node Name to be peeked from stack.
+	 * @param Node $node Name to be peeked from stack.
 	 * @return bool|mixed Peeked stack value.
-	 * @throws SegmentationFaultException
+	 * @throws ScopeException
 	 */
-	public function peek(VariableNode $node)
+	public function peek(Node $node)
 	{
 		if($this->stack->isEmpty())
 			return false;
 		
-		if(!is_numeric($name = substr($node->value(), 1)))
+		if(!is_numeric($name = substr($node->getValue(), 1)))
 			return false;
 		
 		$name = intval($name);
 		
 		if($name > $this->stack->top())
-			throw new SegmentationFaultException;
+			throw ScopeException::segmentationFault();
 		
 		return $this->stack[$name];
 	}
@@ -152,12 +161,12 @@ class Scope
 	/**
 	 * Pushes a frame to execution stack.
 	 * @param array $args Arguments to be pushed to stack.
-	 * @throws StackOverflowException
+	 * @throws ScopeException
 	 */
 	public function push(array $args)
 	{
 		if($this->depth > $this->limit)
-			throw new StackOverflowException;
+			throw ScopeException::stackOverflow();
 		
 		foreach(array_reverse($args) as $arg)
 			$this->stack->push($arg);
@@ -165,5 +174,4 @@ class Scope
 		$this->stack->push(count($args));
 		++$this->depth;
 	}
-	
 }

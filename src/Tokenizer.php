@@ -1,18 +1,14 @@
 <?php
 /**
- * Mathr\Parser\Tokenizer class file.
+ * Mathr\Tokenizer class file.
  * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @license MIT License
- * @copyright 2017 Rodrigo Siqueira
+ * @copyright 2017-2018 Rodrigo Siqueira
  */
-namespace Mathr\Parser;
+namespace Mathr;
 
-use Iterator;
-use Mathr\Exception\UnknownTokenException;
-
-class Tokenizer
-	implements Iterator
+class Tokenizer implements \Iterator
 {
 	/**
 	 * Expression tokens in raw data format.
@@ -34,12 +30,13 @@ class Tokenizer
 	{
 		preg_match_all(
 			'/([0-9]*\.[0-9]+|[0-9]+\.?)'.              # Group 1: Number literals
-			'|([a-zA-Zα-ωΑ-Ω_][a-zA-Zα-ωΑ-Ω0-9_]*)'.    # Group 2: Variables or functions
+			'|([A-Za-zα-ωΑ-Ω_][A-Za-z0-9α-ωΑ-Ω_]*)'.    # Group 2: Variables or functions
 			'|(\+|-|\/|\*)'.                            # Group 3: Right to Left Operators
 			'|(\^|=)'.                                  # Group 4: Left to Right Operators
-			'|(\(|\))'.                                 # Group 5: Parentheses and comma
+			'|(\(|\))'.                                 # Group 5: Parentheses
 			'|(,)'.                                     # Group 6: Comma
-			'/',
+			'|([^\s])'.                                 # Group 7: Unknown
+			'/u',
 			$expression,
 			$this->data,
 			PREG_PATTERN_ORDER|PREG_OFFSET_CAPTURE
@@ -48,62 +45,57 @@ class Tokenizer
 	
 	/**
 	 * Retuns the current iteration data.
-	 * @return mixed Currently iterated token.
-	 * @throws UnknownTokenException
+	 * @return Token Currently iterated token.
 	 */
-	public function current() : Token
+	public function current(): Token
 	{
-		if(($data = $this->data[1][$this->position][0]) !== "") {
-			return Token::number($data);
-		}
+		$position = $this->position;
+		list($data, $char) = $this->data[0][$this->position];
 		
-		if($data = $this->data[2][$this->position][0]) {
-			if(
-				($this->position + 1) < count($this->data[5]) &&
-			    is_array($this->data[5][$this->position + 1]) &&
-				$this->data[5][$this->position + 1][0] == '('
+		if($this->data[1][$position][0] !== '')
+			return Token::number($data, $char);
+		
+		if($this->data[2][$position][0]) {
+			if(($position + 1) < count($this->data[5]) &&
+			   is_array($this->data[5][$position + 1]) &&
+			   $this->data[5][$position + 1][0] == '('
 			) {
 				$this->next();
-				return Token::function($data);
+				return Token::function($data, $char);
 			}
 			
-			return Token::variable('$'.$data);
+			return Token::variable('$'.$data, $char);
 		}
 		
-		if($data = $this->data[3][$this->position][0]) {
-			return Token::operator($data, Token::RIGHT);
-		}
+		if($this->data[3][$position][0])
+			return Token::operator($data, Token::RIGHT, $char);
 		
-		if($data = $this->data[4][$this->position][0]) {
-			return Token::operator($data, Token::LEFT);
-		}
+		if($this->data[4][$position][0])
+			return Token::operator($data, Token::LEFT, $char);
 		
-		if($data = $this->data[5][$this->position][0]) {
-			return Token::parentheses($data == '(');
-		}
+		if($this->data[5][$position][0])
+			return Token::paren($data == '(', $char);
 		
-		if($data = $this->data[6][$this->position][0]) {
-			return Token::comma();
-		}
+		if($this->data[6][$position][0])
+			return Token::comma($char);
 		
-		throw new UnknownTokenException;
+		return Token::unknown($char);
 	}
 	
 	/**
 	 * Advances the iteration position in one.
 	 * @return int The new iterator position.
 	 */
-	public function next()
+	public function next(): int
 	{
-		++$this->position;
-		return $this->position;
+		return ++$this->position;
 	}
 	
 	/**
 	 * Returns the current iteration key.
 	 * @return int Expression iteration position.
 	 */
-	public function key() : int
+	public function key(): int
 	{
 		return $this->data[0][$this->position][1];
 	}
@@ -112,7 +104,7 @@ class Tokenizer
 	 * Informs whether the iterator is still valid.
 	 * @return bool Is the iterator valid?
 	 */
-	public function valid() : bool
+	public function valid(): bool
 	{
 		return $this->position < count($this->data[0]);
 	}
@@ -121,7 +113,7 @@ class Tokenizer
 	 * Rewinds the iterator position to the first position.
 	 * @return bool It always succeeds.
 	 */
-	public function rewind()
+	public function rewind(): bool
 	{
 		$this->position = 0;
 		return true;
