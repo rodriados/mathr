@@ -8,13 +8,29 @@
  */
 namespace Mathr;
 
-abstract class Node
+use Mathr\Node\NullNode;
+use Mathr\Node\NumberNode;
+use Mathr\Node\FunctionNode;
+use Mathr\Node\OperatorNode;
+use Mathr\Node\VariableNode;
+use Mathr\Node\NodeInterface;
+
+abstract class Node implements NodeInterface
 {
 	/**
 	 * Node's internal value.
 	 * @var mixed Value held by node.
 	 */
 	protected $value;
+	
+	/**
+	 * Node constructor.
+	 * @param mixed $value Value to be held by this node.
+	 */
+	public function __construct($value)
+	{
+		$this->value = $value;
+	}
 	
 	/**
 	 * Represents this node as a string.
@@ -29,15 +45,13 @@ abstract class Node
 	 * Returns this node's value.
 	 * @return mixed Node's internal value.
 	 */
-	public function getValue()
+	final public function getValue()
 	{
 		return $this->value;
 	}
 	
 	/**
-	 * Evaluates this node and returns its result.
-	 * @param Scope $scope Storage for variables and functions.
-	 * @return Node Resulting node.
+	 * @inheritdoc
 	 */
 	abstract public function evaluate(Scope $scope): Node;
 	
@@ -47,6 +61,21 @@ abstract class Node
 	 * @param \SplStack $stack Input stack.
 	 * @return Node Created node.
 	 */
-	abstract public static function fromToken(Token $token, \SplStack $stack): Node;
+	public static function fromToken(Token $token, \SplStack $stack): Node
+	{
+		if($token->is(Token::NUMBER))
+			return NumberNode::fromToken($token, $stack);
+		
+		if($token->is(Token::VARIABLE))
+			return VariableNode::fromToken($token, $stack);
+		
+		if($token->is(Token::FUNCTION))
+			return FunctionNode::fromToken($token, $stack);
+		
+		if($token->is(Token::OPERATOR))
+			return OperatorNode::fromToken($token, $stack);
+		
+		return new NullNode;
+	}
 	
 }

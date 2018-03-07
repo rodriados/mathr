@@ -8,71 +8,23 @@
  */
 namespace Mathr;
 
+use Mathr\Node\NullNode;
+use Mathr\Node\NumberNode;
+use Mathr\Node\NodeInterface;
 use Mathr\Exception\ScopeException;
+use Mathr\Node\OperatorNode;
 
 class Scope
 {
 	/**
-	 * Informs the names of native constants.
-	 * @var array
-	 */
-	const CONSTANT_LIST = [
-		'$e', '$inf', '$pi', '$π', '$phi', '$φ', '$psi', '$ψ',
-	];
-	
-	/**
-	 * Informs the values of native constants.
-	 * @var array
-	 */
-	const CONSTANT = [
-		'$e'    => M_E,
-		'$inf'  => INF,
-		'$pi'   => M_PI,
-		'$π'    => M_PI,
-		'$phi'  => 1.618033988749894,
-		'$φ'    => 1.618033988749894,
-		'$psi'  => 3.359885666243177,
-		'$ψ'    => 3.359885666243177,
-	];
-	
-	/**
-	 * Informs the names of native functions.
-	 * @var array
-	 */
-	const FUNCTION_LIST = [
-		'abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'ceil',
-		'cos', 'cosh', 'deg2rad', 'float', 'floor', 'hypot', 'int', 'log',
-		'max', 'min', 'mod', 'rad2deg', 'rand', 'round', 'rt',
-		'sin', 'sinh', 'sqrt', 'tan', 'tanh',
-		'sum', 'sub', 'mult', 'div', 'pow', 'equ',
-	];
-	
-	/**
-	 * Informs the arguments' number of the native functions. If not in this
-	 * list, the assumed number is 1. If negative, the function may accept more
-	 * arguments. If positive, only the exact number of arguments is accepted.
-	 * @var array
-	 */
-	const FUNCTION_ARGC = [
-		'hypot' => +2,
-		'log'   => -1,
-		'max'   => -2,
-		'min'   => -2,
-		'mod'   => +2,
-		'rand'  => 0,
-		'round' => -1,
-		'rt'    => +2,
-	];
-	
-	/**
 	 * List of declared variables.
-	 * @var Token[] Stores all declared variables in scope.
+	 * @var NodeInterface[] Stores all declared variables in scope.
 	 */
 	protected $var;
 	
 	/**
 	 * List of declared functions.
-	 * @var Expression[] Stores all declared functions in scope.
+	 * @var NodeInterface[] Stores all declared functions in scope.
 	 */
 	protected $func;
 	
@@ -108,52 +60,49 @@ class Scope
 		$this->depth = 0;
 	}
 	
-	public function getVariable(Token $name): ?Token
+	/**
+	 * Retrieves the value of a stored or global variable.
+	 * @param Node $name The variable being retrieved.
+	 * @return NodeInterface The search result.
+	 */
+	public function getVariable(Node $name): NodeInterface
 	{
-		$n = $name->getData();
+		$name = $name->getValue();
 		
-		if(isset($this->var[$n]))
-			return $this->var[$n];
+		if(isset($this->var[$name]))
+			return $this->var[$name];
 		
-		if(isset(self::CONSTANT_LIST[$n]))
-			return self::CONSTANT[$n];
+		if(in_array($name, Native::CONSTANT_LIST))
+			return new NumberNode(Native::CONSTANT[$name]);
 		
-		return null;
+		return new NullNode;
 	}
 	
-	public function getFunction(Token $name): Expression
+	/**
+	 * Stores a value into a variable.
+	 * @param Node $name The variable name.
+	 * @param NodeInterface $value The variable value.
+	 */
+	public function setVariable(Node $name, NodeInterface $value)
 	{
-		$n = $name->getData();
-		
-		if(isset($this->func[$n]))
-			return $this->func[$n];
-		
-		#if(isset(self::FUNCTION_LIST[$n]))
-		#	return Function::native($n);
-		
-		throw ScopeException::unknownFunction($name);
+		$this->var[$name->getValue()] = $value;
 	}
 	
-	public function setVariable(Token $name, Token $value)
+	/**
+	 * Retrieves a stored or global function.
+	 * @param Node $name The function being retrieved.
+	 * @return NodeInterface The search result.
+	 */
+	public function getFunction(Node $name): NodeInterface
 	{
-		$this->var[$name->getData()] = $value;
-	}
-	
-	public function setFunction(Token $name, Expression $body)
-	{
-		$this->var[$name->getData()][] = $body;
-	}
-	
-	public function pop()
-	{
-		if($this->stack->isEmpty())
-			throw ScopeException::stackFrame();
+		$name = $name->getValue();
 		
-		$count = $this->stack->pop();
+		if(isset($this->func[$name]))
+			return $this->func[$name];
 		
-		for($i = 0; $i < $count; ++$i)
-			$this->stack->pop();
+		if(in_array($name, Native::FUNCTION_LIST))
+			return new OperatorNode($name);
 		
-		--$this->depth;
+		return new NullNode;
 	}
 }

@@ -8,33 +8,23 @@
  */
 namespace Mathr;
 
-class Expression extends \SplQueue
+use Mathr\Node\NodeInterface;
+
+class Expression extends \SplQueue implements NodeInterface
 {
 	/**
 	 * Evaluates the expression and returns a value.
 	 * @param Scope $scope Scope containing variables and functions.
-	 * @param \SplStack $stack The evaluation stack.
-	 * @return Token The evaluated expression result.
+	 * @return Node The evaluated expression result.
 	 */
-	public function evaluate(Scope $scope, \SplStack $stack): Token
+	public function evaluate(Scope $scope): Node
 	{
-		while(!$this->isEmpty()) {
-			$token = $this->shift();
-			
-			if($token->is(Token::NUMBER))
-				$stack->push(NumberNode::fromToken($token, $stack));
-			
-			elseif($token->is(Token::VARIABLE))
-				$stack->push(VariableNode::fromToken($token, $stack));
-			
-			elseif($token->is(Token::FUNCTION))
-				$stack->push(FunctionNode::fromToken($token, $stack));
-			
-			elseif($token->is(Token::OPERATOR))
-				$stack->push(OperatorNode::fromToken($token, $stack));
-		}
+		$stack = new \SplStack;
 		
-		$stack->pop()->evaluate($scope);
+		for($i = 0; $i < $this->count(); ++$i)
+			$stack->push(Node::fromToken($this[$i], $stack));
+
+		return $stack->pop()->evaluate($scope);
 	}
 	
 	/**
