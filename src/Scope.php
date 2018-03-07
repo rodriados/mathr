@@ -10,9 +10,11 @@ namespace Mathr;
 
 use Mathr\Node\NullNode;
 use Mathr\Node\NumberNode;
+use Mathr\Node\OperatorNode;
+use Mathr\Node\VariableNode;
+use Mathr\Node\FunctionNode;
 use Mathr\Node\NodeInterface;
 use Mathr\Exception\ScopeException;
-use Mathr\Node\OperatorNode;
 
 class Scope
 {
@@ -50,7 +52,7 @@ class Scope
 	 * Scope constructor.
 	 * @param int $limit Limit for function calls depth.
 	 */
-	public function __construct(int $limit = 100)
+	public function __construct(int $limit = 20)
 	{
 		$this->var = [];
 		$this->func = [];
@@ -81,20 +83,20 @@ class Scope
 	
 	/**
 	 * Stores a variable into the scope.
-	 * @param Node $name The variable name.
+	 * @param VariableNode $name The variable name.
 	 * @param NodeInterface $value The variable value.
 	 */
-	public function setVariable(Node $name, NodeInterface $value)
+	public function setVariable(VariableNode $name, NodeInterface $value)
 	{
 		$this->var[$name->getValue()] = $value;
 	}
 	
 	/**
 	 * Retrieves a stored or global function.
-	 * @param Node $name The function being retrieved.
+	 * @param FunctionNode $name The function being retrieved.
 	 * @return NodeInterface|array The search result.
 	 */
-	public function getFunction(Node $name)
+	public function getFunction(FunctionNode $name)
 	{
 		$name = $name->getValue();
 		
@@ -109,16 +111,16 @@ class Scope
 	
 	/**
 	 * Stores a function definition into the scope.
-	 * @param Node $name
-	 * @param NodeInterface $block
+	 * @param FunctionNode $decl The function declaration.
+	 * @param NodeInterface $block The function block.
 	 */
-	public function setFunction(Node $name, NodeInterface $block)
+	public function setFunction(FunctionNode $decl, NodeInterface $block)
 	{
-		$this->func[$name->getValue()][] = [$name, $block];
+		$this->func[$decl->getValue()][] = [$decl, $block];
 	}
 	
 	/**
-	 * Pops a frame from execution stack.
+	 * Pops a frame from execu$nametion stack.
 	 * @throws ScopeException There are no frames in stack.
 	 */
 	public function pop()

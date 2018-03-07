@@ -35,13 +35,13 @@ class OperatorNode extends Node
 	 * @var string[] Operators' names.
 	 */
 	const OP_NAME = [
-		'0+' => 'pos',
-		'0-' => 'neg',
-		'+'  => 'sum',
-		'-'  => 'sub',
-		'*'  => 'mul',
-		'/'  => 'div',
-		'^'  => 'pow',
+		'0+' => '_pos_',
+		'0-' => '_neg_',
+		'+'  => '_sum_',
+		'-'  => '_sub_',
+		'*'  => '_mul_',
+		'/'  => '_div_',
+		'^'  => '_pow_',
 		'='  => '=',
 	];
 	

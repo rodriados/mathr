@@ -13,18 +13,27 @@ use Mathr\Node\NodeInterface;
 class Expression extends \SplQueue implements NodeInterface
 {
 	/**
+	 * Builds an execution tree for the expression.
+	 * @return Node The execution tree root.
+	 */
+	public function build(): Node
+	{
+		$stack = new \SplStack;
+		
+		for($i = 0; $i < $this->count(); ++$i)
+			$stack->push(Node::fromToken($this[$i], $stack));
+		
+		return $stack->pop();
+	}
+	
+	/**
 	 * Evaluates the expression and returns a value.
 	 * @param Scope $scope Scope containing variables and functions.
 	 * @return Node The evaluated expression result.
 	 */
 	public function evaluate(Scope $scope): Node
 	{
-		$stack = new \SplStack;
-		
-		for($i = 0; $i < $this->count(); ++$i)
-			$stack->push(Node::fromToken($this[$i], $stack));
-
-		return $stack->pop()->evaluate($scope);
+		return $this->build()->evaluate($scope);
 	}
 	
 	/**
