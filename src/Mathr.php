@@ -76,6 +76,16 @@ class Mathr
 	}
 	
 	/**
+	 * Stores many variables to the scope.
+	 * @param array $data Variables names and values.
+	 */
+	public function setVariables(array $data)
+	{
+		foreach($data as $name => $value)
+			$this->setVariable($name, $value);
+	}
+	
+	/**
 	 * Stores a function into the scope.
 	 * @param string $decl The function declaration.
 	 * @param string $block The function block.
