@@ -55,31 +55,31 @@ class Tokenizer implements \Iterator
 		if($this->data[1][$position][0] !== '')
 			return Token::number($data, $char);
 		
-		if(isset($this->data[3][$position][0]))
-			return Token::operator($data, Token::RIGHT, $char);
-		
-		if(isset($this->data[4][$position][0]))
-			return Token::operator($data, Token::LEFT, $char);
-		
-		if(isset($this->data[5][$position][0]))
-			return Token::paren($data == '(', $char);
-		
-		if(isset($this->data[6][$position][0]))
-			return Token::comma($char);
-		
-		if(!isset($this->data[2][$position][0]))
-			return Token::unknown($char);
-		
-		if(($position + 1) < count($this->data[5]) &&
-		   is_array($this->data[5][$position + 1]) &&
-		   $this->data[5][$position + 1][0] == '('
-		) {
-			$this->next();
-			return Token::function($data, $char);
+		if($this->data[2][$position][0]) {
+			if(($position + 1) < count($this->data[5]) &&
+			   is_array($this->data[5][$position + 1]) &&
+			   $this->data[5][$position + 1][0] == '('
+			) {
+				$this->next();
+				return Token::function($data, $char);
+			}
+			
+			return Token::variable('$'.$data, $char);
 		}
 		
-		return Token::variable($data, $char);
+		if($this->data[3][$position][0])
+			return Token::operator($data, Token::RIGHT, $char);
 		
+		if($this->data[4][$position][0])
+			return Token::operator($data, Token::LEFT, $char);
+		
+		if($this->data[5][$position][0])
+			return Token::paren($data == '(', $char);
+		
+		if($this->data[6][$position][0])
+			return Token::comma($char);
+		
+		return Token::unknown($char);
 	}
 	
 	/**

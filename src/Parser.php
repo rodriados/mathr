@@ -17,8 +17,8 @@ class Parser
 	 * @var array Informs which operators should execute before the others.
 	 */
 	protected static $prec = [
-		'0+' => 6,
-		'0-' => 6,
+		'0+' => 10,
+		'0-' => 10,
 		'^' => 4,
 		'*' => 3,
 		'/' => 3,
@@ -74,13 +74,14 @@ class Parser
 
 		foreach(new Tokenizer($expr) as $token)
 			$this->receive($token);
-		
-		while(!$this->stack->isEmpty())
-			if($this->stack->top()->is(Token::PARENTHESES|Token::LEFT))
-				throw ParserException::mismatched($this->stack->top());
-			else
-				$this->output->push($this->stack->top());
 
+		while(!$this->stack->isEmpty()) {
+			if($this->stack->top()->is(Token::PARENTHESES | Token::LEFT))
+				throw ParserException::mismatched($this->stack->top());
+		
+			$this->output->push($this->stack->pop());
+		}
+		
 		return $this->output;
 	}
 	
@@ -156,7 +157,7 @@ class Parser
 		if($token->is(Token::OPERATOR)) {
 			if(!$this->expectingOperator && in_array($token->getData(), ['+', '-']))
 				$token = Token::operator("0{$token}", Token::RIGHT, $token->getPosition());
-			else
+			elseif(!$this->expectingOperator || $this->inFunction)
 				throw ParserException::unexpected($token);
 			
 			while(
@@ -184,6 +185,61 @@ class Parser
 			
 			$this->stack->push($token);
 			$this->expectingOperator = false;
+			return;
+		}
+		
+		/*
+		 * If the current token is a RIGHT PARENTHESES:
+		 * - While operator in stack is not a left parentheses, push to output;
+		 * - If a left parentheses is not found, we have an error;
+		 * - If the operator in stack is a function, push to output;
+		 */
+		if($token->is(Token::PARENTHESES|Token::RIGHT)) {
+			while(
+				!$this->stack->isEmpty() &&
+				!$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
+			) {
+				$this->output->push($this->stack->pop());
+			}
+			
+			if($this->stack->isEmpty())
+				throw ParserException::mismatched($token);
+			
+			$popped = $this->stack->pop();
+			
+			if($popped->is(Token::FUNCTION))
+				$this->output->push($popped);
+			
+			$this->expectingOperator = true;
+			$this->inFunction = false;
+			return;
+		}
+		
+		/*
+		 * If the current token is a COMMA:
+		 * - If an operator is not expected, we have an error;
+		 * - If we are in a function context, we have an error;
+		 * - While operator in stack is not a left parentheses, push to output;
+		 * - If a left parentheses is not found, we have an error;
+		 * - Pop function count from output and push to stack;
+		 */
+		if($token->is(Token::COMMA)) {
+			if(!$this->expectingOperator || $this->inFunction)
+				throw ParserException::unexpected($token);
+			
+			while(
+				!$this->stack->isEmpty() &&
+				!$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
+			) {
+				$this->output->push($this->stack->pop());
+			}
+			
+			if($this->stack->isEmpty())
+				throw ParserException::unexpected($token);
+			
+			$this->stack->push($this->output->pop());
+			$this->expectingOperator = false;
+			$this->inFunction = true;
 			return;
 		}
 	}

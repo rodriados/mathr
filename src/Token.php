@@ -55,7 +55,7 @@ class Token
 	 * @param int $type Data type held by token.
 	 * @param int $position The token's position.
 	 */
-	protected function __construct(string $data, int $type, int $position)
+	public function __construct(string $data, int $type, int $position)
 	{
 		$this->data = $data;
 		$this->type = $type;
