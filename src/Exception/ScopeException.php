@@ -44,4 +44,22 @@ class ScopeException extends MathrException
 	{
 		return new self("The scope's stack is empty and cannot be popped.");
 	}
+	
+	/**
+	 * Creates a segmentation fault exception.
+	 * @return ScopeException
+	 */
+	public static function segmentationFault(): self
+	{
+		return new self("A segmentation fault occurred.");
+	}
+	
+	/**
+	 * Creates a segmentation fault exception.
+	 * @return ScopeException
+	 */
+	public static function stackOverflow(): self
+	{
+		return new self("A stack overflow occurred.");
+	}
 }

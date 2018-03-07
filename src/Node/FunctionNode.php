@@ -73,7 +73,7 @@ class FunctionNode extends OperatorNode
 		if($heap->isEmpty())
 			throw NodeException::incompatibleDefinition($this->value);
 		
-		$scope->push($argv ?? []);
+		$scope->push($argv->toArray());
 		$value = $heap->top()->evaluate($scope);
 		$scope->pop();
 		

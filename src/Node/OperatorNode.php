@@ -65,7 +65,7 @@ class OperatorNode extends Node
 	public function __construct(string $symbol, \SplStack $stack = null)
 	{
 		$this->argc = self::OP_ARGC[$symbol] ?? $this->argc;
-		$this->argv = $this->argc ? new \SplFixedArray($this->argc) : [];
+		$this->argv = new \SplFixedArray($this->argc);
 		
 		for($i = $this->argc - 1; $i >= 0; --$i)
 			$this->argv[$i] = $stack->pop();

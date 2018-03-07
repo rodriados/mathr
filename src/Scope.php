@@ -67,19 +67,20 @@ class Scope
 	 */
 	public function getVariable(Node $name): NodeInterface
 	{
-		$name = $name->getValue();
+		if(isset($this->var[$name->getValue()]))
+			return $this->var[$name->getValue()];
 		
-		if(isset($this->var[$name]))
-			return $this->var[$name];
+		if($value = $this->peek($name))
+			return $value;
 		
-		if(in_array($name, Native::CONSTANT_LIST))
-			return new NumberNode(Native::CONSTANT[$name]);
+		if(in_array($name->getValue(), Native::CONSTANT_LIST))
+			return new NumberNode(Native::CONSTANT[$name->getValue()]);
 		
 		return new NullNode;
 	}
 	
 	/**
-	 * Stores a value into a variable.
+	 * Stores a variable into the scope.
 	 * @param Node $name The variable name.
 	 * @param NodeInterface $value The variable value.
 	 */
@@ -91,9 +92,9 @@ class Scope
 	/**
 	 * Retrieves a stored or global function.
 	 * @param Node $name The function being retrieved.
-	 * @return NodeInterface The search result.
+	 * @return NodeInterface|array The search result.
 	 */
-	public function getFunction(Node $name): NodeInterface
+	public function getFunction(Node $name)
 	{
 		$name = $name->getValue();
 		
@@ -104,5 +105,71 @@ class Scope
 			return new OperatorNode($name);
 		
 		return new NullNode;
+	}
+	
+	/**
+	 * Stores a function definition into the scope.
+	 * @param Node $name
+	 * @param NodeInterface $block
+	 */
+	public function setFunction(Node $name, NodeInterface $block)
+	{
+		$this->func[$name->getValue()][] = [$name, $block];
+	}
+	
+	/**
+	 * Pops a frame from execution stack.
+	 * @throws ScopeException There are no frames in stack.
+	 */
+	public function pop()
+	{
+		if($this->stack->isEmpty())
+			throw ScopeException::stackFrame();
+		
+		$count = $this->stack->pop();
+		
+		for($i = 0; $i < $count; ++$i)
+			$this->stack->pop();
+		
+		--$this->depth;
+	}
+	
+	/**
+	 * Peeks at value in current stack frame.
+	 * @param Node $node Name to be peeked from stack.
+	 * @return bool|mixed Peeked stack value.
+	 * @throws ScopeException
+	 */
+	public function peek(Node $node)
+	{
+		if($this->stack->isEmpty())
+			return false;
+		
+		if(!is_numeric($name = substr($node->getValue(), 1)))
+			return false;
+		
+		$name = intval($name);
+		
+		if($name > $this->stack->top())
+			throw ScopeException::segmentationFault();
+		
+		return $this->stack[$name];
+	}
+	
+	/**
+	 * Pushes a frame to execution stack.
+	 * @param array $args Arguments to be pushed to stack.
+	 * @throws ScopeException
+	 */
+	public function push(array $args)
+	{
+		if($this->depth > $this->limit)
+			throw ScopeException::stackOverflow();
+		
+		foreach(array_reverse($args) as $arg)
+			$this->stack->push($arg);
+		
+		$this->stack->push(count($args));
+		++$this->depth;
 	}
 }
