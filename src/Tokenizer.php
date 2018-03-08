@@ -30,7 +30,7 @@ class Tokenizer implements \Iterator
 	{
 		preg_match_all(
 			'/([0-9]*\.[0-9]+|[0-9]+\.?)'.              # Group 1: Number literals
-			'|([A-Za-zα-ωΑ-Ω_][A-Za-z0-9α-ωΑ-Ω_]*)'.    # Group 2: Variables or functions
+			'|([A-Za-zα-ωΑ-Ω][A-Za-z0-9α-ωΑ-Ω_]*)'.     # Group 2: Variables or functions
 			'|(\+|-|\/|\*)'.                            # Group 3: Right to Left Operators
 			'|(\^|=)'.                                  # Group 4: Left to Right Operators
 			'|(\(|\))'.                                 # Group 5: Parentheses
