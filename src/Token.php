@@ -187,7 +187,7 @@ class Token
 	 */
 	public static function unknown(int $pos): self
 	{
-		return new self(',', self::UNKNOWN, $pos);
+		return new self('', self::UNKNOWN, $pos);
 	}
 	
 }
