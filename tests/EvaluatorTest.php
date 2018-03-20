@@ -38,6 +38,11 @@ final class EvaluatorTest extends TestCase
 			$this->mathr->evaluate("b"),
 			10
 		);
+		
+		$this->mathr->delVariable("a");
+		
+		$this->expectException(\Mathr\Exception\NodeException::class);
+		$this->mathr->evaluate("a");
 	}
 	
 	public function testCanDeclareFunction()
@@ -48,6 +53,11 @@ final class EvaluatorTest extends TestCase
 			$this->mathr->evaluate("f(3)"),
 			16
 		);
+		
+		$this->mathr->delFunction("f");
+		
+		$this->expectException(\Mathr\Exception\NodeException::class);
+		$this->mathr->evaluate("f(3)");
 	}
 	
 	public function testCanDeclareRecursiveFunction()
@@ -137,5 +147,4 @@ final class EvaluatorTest extends TestCase
 			10
 		);
 	}
-	
 }

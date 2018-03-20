@@ -19,10 +19,11 @@ class ParserException extends MathrException
 	 */
 	public static function mismatched(Token $token): self
 	{
-		return new self(sprintf(
+		return new self(
 			"Mismatched '%s' in position %d.",
-			$token->getData(), $token->getPosition()
-		));
+			$token->getData(),
+			$token->getPosition()
+		);
 	}
 	
 	/**
@@ -32,15 +33,15 @@ class ParserException extends MathrException
 	 */
 	public static function unexpected(Token $token): self
 	{
-		return new self(sprintf(
+		return new self(
 			"Unexpected token '%s' in position %d.",
-			$token->getData(), $token->getPosition()
-        ));
+			$token->getData(),
+			$token->getPosition()
+        );
 	}
 	
 	public static function unknown(): self
 	{
-		return new self("An unknown error occurred during parsing.");
+		return new self("An unknown error occurred while parsing.");
 	}
-	
 }

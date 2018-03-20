@@ -8,8 +8,6 @@
  */
 namespace Mathr\Exception;
 
-use Mathr\Token;
-
 class NodeException extends MathrException
 {
 	/**
@@ -19,7 +17,7 @@ class NodeException extends MathrException
 	 */
 	public static function invalidNumber($value): self
 	{
-		return new self("The string '".$value."' is not numeric.");
+		return new self("The string '%s' is not numeric.", $value);
 	}
 	
 	/**
@@ -29,7 +27,9 @@ class NodeException extends MathrException
 	 */
 	public static function incompatibleDefinition($value): self
 	{
-		return new self("No compatible definition of function '".$value."' was found.");
+		return new self(
+			"No compatible definition of function '%s' was found.", $value
+		);
 	}
 	
 	/**
@@ -39,6 +39,6 @@ class NodeException extends MathrException
 	 */
 	public static function unknownSymbol($value): self
 	{
-		return new self("The symbol '".$value."' is unknown.");
+		return new self("The symbol '%s' is unknown.", $value);
 	}
 }

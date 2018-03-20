@@ -92,6 +92,18 @@ class Scope
 	}
 	
 	/**
+	 * Removes a variable from scope.
+	 * @param string $name Variable to be removed.
+	 */
+	public function delVariable(string $name)
+	{
+		$name = '$'.$name;
+		
+		if(isset($this->var[$name]))
+			unset($this->var[$name]);
+	}
+	
+	/**
 	 * Retrieves a stored or global function.
 	 * @param FunctionNode $name The function being retrieved.
 	 * @return NodeInterface|array The search result.
@@ -117,6 +129,16 @@ class Scope
 	public function setFunction(FunctionNode $decl, NodeInterface $block)
 	{
 		$this->func[$decl->getValue()][] = [$decl, $block];
+	}
+	
+	/**
+	 * Deletes a function from scope.
+	 * @param string $name Function to be deleted.
+	 */
+	public function delFunction(string $name)
+	{
+		if(isset($this->func[$name]))
+			unset($this->func[$name]);
 	}
 	
 	/**

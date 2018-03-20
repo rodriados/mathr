@@ -86,6 +86,15 @@ class Mathr
 	}
 	
 	/**
+	 * Deletes a variable from the scope.
+	 * @param string $name Variable to delete.
+	 */
+	public function delVariable(string $name)
+	{
+		$this->scope->delVariable($name);
+	}
+	
+	/**
 	 * Stores a function into the scope.
 	 * @param string $decl The function declaration.
 	 * @param string $block The function block.
@@ -97,11 +106,20 @@ class Mathr
 		$block = $this->parser->parse($block)->build();
 		
 		if(!$decl instanceof FunctionNode)
-			throw new MathrException;
+			throw MathrException::noFunction($decl);
 		
 		$this->scope->setFunction(
 			$decl->processBody($block),
 			$block
 		);
+	}
+	
+	/**
+	 * Deletes a function from the scope, using its name.
+	 * @param string $name The function name.
+	 */
+	public function delFunction(string $name)
+	{
+		$this->scope->delFunction($name);
 	}
 }
