@@ -8,10 +8,11 @@
  */
 namespace Mathr\Node;
 
-use Mathr\Exception\NodeException;
 use Mathr\Node;
 use Mathr\Scope;
+use Mathr\Token;
 use Mathr\Native;
+use Mathr\Exception\NodeException;
 
 class FunctionNode extends OperatorNode
 {
@@ -27,7 +28,7 @@ class FunctionNode extends OperatorNode
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function evaluate(Scope $scope): Node
 	{
@@ -107,5 +108,20 @@ class FunctionNode extends OperatorNode
 		}
 		
 		return $this;
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function compress(): string
+	{
+		$repr = $this->getValue().":".Token::FUNCTION;
+		$repr = $this->argc.":".Token::NUMBER.";".$repr;
+		$args = null;
+		
+		foreach($this->argv as $nodes)
+			$args .= $nodes->compress().";";
+		
+		return $args.$repr;
 	}
 }

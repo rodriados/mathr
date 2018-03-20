@@ -4,7 +4,7 @@ use Mathr\Mathr;
 use Mathr\Exception\ScopeException;
 use PHPUnit\Framework\TestCase;
 
-final class EvaluatorTest extends TestCase
+final class MathrTest extends TestCase
 {
 	/**
 	 * @var Mathr $mathr
@@ -146,5 +146,25 @@ final class EvaluatorTest extends TestCase
 			$this->mathr->evaluate("log(a,2)"),
 			10
 		);
+	}
+	
+	public function testCanExport()
+	{
+		$this->mathr->evaluate("fib(0) = 1");
+		$this->mathr->evaluate("fib(1) = 1");
+		$this->mathr->evaluate("fib(x) = fib(x-2) + fib(x-1)");
+		$this->mathr->evaluate("a = 10");
+		$this->mathr->evaluate("elefante = 6");
+		$this->mathr->evaluate("rtN(x, N) = x ^ (1/N)");
+		
+		$expect = file_get_contents(__DIR__."/scope.json");
+		$this->assertEquals($expect, $this->mathr->export());
+	}
+	
+	public function testCanImport()
+	{
+		$this->mathr->import(file_get_contents(__DIR__."/scope.json"));
+		$this->assertEquals($this->mathr->evaluate("rtN(8,3)"), 2);
+		$this->assertEquals($this->mathr->evaluate("fib(elefante)"), 13);
 	}
 }

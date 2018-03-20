@@ -16,7 +16,7 @@ use Mathr\Exception\NodeException;
 class VariableNode extends Node
 {
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function evaluate(Scope $scope): Node
 	{
@@ -38,11 +38,18 @@ class VariableNode extends Node
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
+	 */
+	public function compress(): string
+	{
+		return $this->getValue().":".Token::VARIABLE;
+	}
+	
+	/**
+	 * {@inheritdoc}
 	 */
 	public static function fromToken(Token $token, \SplStack $stack): Node
 	{
 		return new static($token->getData());
 	}
-	
 }

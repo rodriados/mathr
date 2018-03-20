@@ -14,6 +14,12 @@ use Mathr\Scope;
 interface NodeInterface
 {
 	/**
+	 * Transforms the node into a string.
+	 * @return string The node represented as a string.
+	 */
+	public function compress(): string;
+	
+	/**
 	 * Evaluates this node and returns its result.
 	 * @param Scope $scope Storage for variables and functions.
 	 * @return Node Resulting node.

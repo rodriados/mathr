@@ -122,4 +122,22 @@ class Mathr
 	{
 		$this->scope->delFunction($name);
 	}
+	
+	/**
+	 * Exports the current scope as a JSON string.
+	 * @return string The current scope exported.
+	 */
+	public function export(): string
+	{
+		return json_encode($this->scope->export());
+	}
+	
+	/**
+	 * Imports a JSON formatted string.
+	 * @param string $data Exported data to import.
+	 */
+	public function import(string $data)
+	{
+		$this->scope->import(json_decode($data, true));
+	}
 }
