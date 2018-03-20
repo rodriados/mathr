@@ -92,6 +92,18 @@ class Scope
 	}
 	
 	/**
+	 * Removes a variable from scope.
+	 * @param string $name Variable to be removed.
+	 */
+	public function delVariable(string $name)
+	{
+		$name = '$'.$name;
+		
+		if(isset($this->var[$name]))
+			unset($this->var[$name]);
+	}
+	
+	/**
 	 * Retrieves a stored or global function.
 	 * @param FunctionNode $name The function being retrieved.
 	 * @return NodeInterface|array The search result.
@@ -117,6 +129,16 @@ class Scope
 	public function setFunction(FunctionNode $decl, NodeInterface $block)
 	{
 		$this->func[$decl->getValue()][] = [$decl, $block];
+	}
+	
+	/**
+	 * Deletes a function from scope.
+	 * @param string $name Function to be deleted.
+	 */
+	public function delFunction(string $name)
+	{
+		if(isset($this->func[$name]))
+			unset($this->func[$name]);
 	}
 	
 	/**
@@ -173,5 +195,43 @@ class Scope
 		
 		$this->stack->push(count($args));
 		++$this->depth;
+	}
+	
+	/**
+	 * Exports the current scope as an array.
+	 * @return array The current scope with compressed functions.
+	 */
+	public function export(): array
+	{
+		$arr = ['var' => [], 'func' => []];
+		
+		foreach($this->var as $vname => $vvalue)
+			$arr['var'][$vname] = $vvalue->compress();
+		
+		foreach($this->func as $fname => $fdecls)
+			/**
+			 * @var Node[] $decl
+			 */
+			foreach($fdecls as $i => $decl)
+				$arr['func'][$fname][$decl[0]->compress()] = $decl[1]->compress();
+		
+		return $arr;
+	}
+	
+	/**
+	 * Imports array of data into current scope.
+	 * @param array $data Data to import.
+	 */
+	public function import(array $data)
+	{
+		foreach($data['var'] as $vname => $vcompressed)
+			$this->var[$vname] = Expression::uncompress($vcompressed);
+		
+		foreach($data['func'] as $fname => $fdecls)
+			foreach($fdecls as $fdecl => $fbody)
+				$this->func[$fname][] = [
+					Expression::uncompress($fdecl),
+					Expression::uncompress($fbody)
+				];
 	}
 }

@@ -76,6 +76,25 @@ class Mathr
 	}
 	
 	/**
+	 * Stores many variables to the scope.
+	 * @param array $data Variables names and values.
+	 */
+	public function setVariables(array $data)
+	{
+		foreach($data as $name => $value)
+			$this->setVariable($name, $value);
+	}
+	
+	/**
+	 * Deletes a variable from the scope.
+	 * @param string $name Variable to delete.
+	 */
+	public function delVariable(string $name)
+	{
+		$this->scope->delVariable($name);
+	}
+	
+	/**
 	 * Stores a function into the scope.
 	 * @param string $decl The function declaration.
 	 * @param string $block The function block.
@@ -87,11 +106,38 @@ class Mathr
 		$block = $this->parser->parse($block)->build();
 		
 		if(!$decl instanceof FunctionNode)
-			throw new MathrException;
+			throw MathrException::noFunction($decl);
 		
 		$this->scope->setFunction(
 			$decl->processBody($block),
 			$block
 		);
+	}
+	
+	/**
+	 * Deletes a function from the scope, using its name.
+	 * @param string $name The function name.
+	 */
+	public function delFunction(string $name)
+	{
+		$this->scope->delFunction($name);
+	}
+	
+	/**
+	 * Exports the current scope as a JSON string.
+	 * @return string The current scope exported.
+	 */
+	public function export(): string
+	{
+		return json_encode($this->scope->export());
+	}
+	
+	/**
+	 * Imports a JSON formatted string.
+	 * @param string $data Exported data to import.
+	 */
+	public function import(string $data)
+	{
+		$this->scope->import(json_decode($data, true));
 	}
 }

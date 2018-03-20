@@ -29,11 +29,19 @@ class NumberNode extends Node
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function evaluate(Scope $scope): Node
 	{
 		return $this;
+	}
+	
+	/**
+	 * {@inheritdoc}
+	 */
+	public function compress(): string
+	{
+		return $this->getValue().":".Token::NUMBER;
 	}
 	
 	/**
@@ -49,11 +57,10 @@ class NumberNode extends Node
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public static function fromToken(Token $token, \SplStack $stack): Node
 	{
 		return static::fromString($token->getData());
 	}
-	
 }

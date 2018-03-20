@@ -23,7 +23,7 @@ class NullNode extends Node
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function evaluate(Scope $scope): Node
 	{
@@ -31,11 +31,18 @@ class NullNode extends Node
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
+	 */
+	public function compress(): string
+	{
+		return "";
+	}
+	
+	/**
+	 * {@inheritdoc}
 	 */
 	public static function fromToken(Token $token, \SplStack $stack): Node
 	{
 		return new static;
 	}
-	
 }

@@ -74,7 +74,7 @@ class OperatorNode extends Node
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function evaluate(Scope $scope): Node
 	{
@@ -103,7 +103,22 @@ class OperatorNode extends Node
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
+	 */
+	public function compress(): string
+	{
+		$repr = array_search($r = $this->getValue(), self::OP_NAME) ?: $r;
+		$repr = $repr.":".Token::OPERATOR;
+		$args = null;
+
+		foreach($this->argv as $node)
+			$args .= $node->compress().";";
+		
+		return $args.$repr;
+	}
+	
+	/**
+	 * {@inheritdoc}
 	 */
 	public static function fromToken(Token $token, \SplStack $stack): Node
 	{

@@ -37,35 +37,29 @@ class Expression extends \SplQueue implements NodeInterface
 	}
 	
 	/**
-	 * Serializes the expression for storage as a string.
-	 * @return string Encrypted expression.
+	 * Transforms the expression back into a string.
+	 * @return string The node represented as a string.
 	 */
-	public function encrypt(): string
+	public function compress(): string
 	{
-		$serialized = $this->count();
-		
-		foreach($this as $token)
-			$serialized .= ';'.$token->getType().':'.$token->getData();
-		
-		return $serialized;
+		return $this->build()->compress();
 	}
 	
 	/**
-	 * Unserializes a string and creates a new expression.
-	 * @param string $expr The string to be unserialized.
-	 * @return Expression The unserialized expression.
+	 * Uncompresses and builds the expression from a string.
+	 * @param string $data Data to be uncompressed.
+	 * @return Node The built expression.
 	 */
-	public static function decrypt(string $expr): self
+	public static function uncompress(string $data): Node
 	{
-		$token = explode(';', $expr);
-		$count = (int)$token[0];
+		$tokens = explode(";", $data);
 		$queue = new self;
 		
-		for($i = 1; $i <= $count; ++$i) {
-			list($type, $data) = explode(':', $token[$i]);
+		foreach($tokens as $token) {
+			list($data, $type) = explode(":", $token);
 			$queue->push(new Token($data, (int)$type, -1));
 		}
 		
-		return $queue;
+		return $queue->build();
 	}
 }

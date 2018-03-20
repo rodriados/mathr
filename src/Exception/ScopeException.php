@@ -19,9 +19,7 @@ class ScopeException extends MathrException
 	 */
 	public static function unknownVariable(Token $name): self
 	{
-		return new self(sprintf("The variable '%s' is not known.",
-			$name->getData()
-		));
+		return new self("The variable '%s' is not known.", $name->getData());
 	}
 	
 	/**
@@ -31,9 +29,7 @@ class ScopeException extends MathrException
 	 */
 	public static function unknownFunction(Token $name): self
 	{
-		return new self(sprintf("The function '%s' is not known.",
-                $name->getData()
-        ));
+		return new self("The function '%s' is not known.", $name->getData());
 	}
 	
 	/**

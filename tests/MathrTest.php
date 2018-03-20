@@ -4,7 +4,7 @@ use Mathr\Mathr;
 use Mathr\Exception\ScopeException;
 use PHPUnit\Framework\TestCase;
 
-final class EvaluatorTest extends TestCase
+final class MathrTest extends TestCase
 {
 	/**
 	 * @var Mathr $mathr
@@ -28,16 +28,22 @@ final class EvaluatorTest extends TestCase
 	{
 		$this->mathr->evaluate("a = 1024");
 		$this->mathr->evaluate("b = 10");
+		$this->mathr->setVariables(["c" => "14", "d" => "16"]);
 		
 		$this->assertEquals(
-			$this->mathr->evaluate("a"),
-			1024
+			$this->mathr->evaluate("a+c"),
+			1024+14
 		);
 		
 		$this->assertEquals(
-			$this->mathr->evaluate("b"),
-			10
+			$this->mathr->evaluate("b-d"),
+			10-16
 		);
+		
+		$this->mathr->delVariable("a");
+		
+		$this->expectException(\Mathr\Exception\NodeException::class);
+		$this->mathr->evaluate("a");
 	}
 	
 	public function testCanDeclareFunction()
@@ -48,13 +54,18 @@ final class EvaluatorTest extends TestCase
 			$this->mathr->evaluate("f(3)"),
 			16
 		);
+		
+		$this->mathr->delFunction("f");
+		
+		$this->expectException(\Mathr\Exception\NodeException::class);
+		$this->mathr->evaluate("f(3)");
 	}
 	
 	public function testCanDeclareRecursiveFunction()
 	{
 		$this->mathr->evaluate("fib(0) = 0");
-		$this->mathr->evaluate("fib(1) = 1");
-		$this->mathr->evaluate("fib(x) = fib(x - 1) + fib(x - 2)");
+		$this->mathr->setFunction("fib(1)", "1");
+		$this->mathr->setFunction("fib(x)", "fib(x - 1) + fib(x - 2)");
 		
 		$this->assertEquals(
 			$this->mathr->evaluate("fib(10)"),
@@ -117,15 +128,17 @@ final class EvaluatorTest extends TestCase
 	
 	public function testKnowsSomeCommomFunctions()
 	{
-		$this->assertEquals(
-			$this->mathr->evaluate("sqrt(81)"),
-			9
-		);
-		
-		$this->assertEquals(
-			$this->mathr->evaluate("log(8,2)"),
-			3
-		);
+		$this->assertEquals($this->mathr->evaluate("sqrt(81)"), 9);
+		$this->assertEquals($this->mathr->evaluate("log(8,2)"), 3);
+		$this->assertEquals($this->mathr->evaluate("+4"), 4);
+		$this->assertEquals($this->mathr->evaluate("-5"), -5);
+		$this->assertEquals($this->mathr->evaluate("abs(-7)"), 7);
+		$this->assertEquals($this->mathr->evaluate("ceil(6.1)"), 7);
+		$this->assertEquals($this->mathr->evaluate("floor(6.9)"), 6);
+		$this->assertEquals($this->mathr->evaluate("max(1,2,3,4,5)"), 5);
+		$this->assertEquals($this->mathr->evaluate("min(1,2,3,4,5)"), 1);
+		$this->assertEquals($this->mathr->evaluate("mod(7, 3)"), 1);
+		$this->assertEquals($this->mathr->evaluate("round(2.7)"), 3);
 	}
 	
 	public function testCanUseVariableWithCommomFunctions()
@@ -138,4 +151,23 @@ final class EvaluatorTest extends TestCase
 		);
 	}
 	
+	public function testCanExport()
+	{
+		$this->mathr->evaluate("fib(0) = 1");
+		$this->mathr->evaluate("fib(1) = 1");
+		$this->mathr->evaluate("fib(x) = fib(x-2) + fib(x-1)");
+		$this->mathr->evaluate("a = 10");
+		$this->mathr->evaluate("elefante = 6");
+		$this->mathr->evaluate("rtN(x, N) = x ^ (1/N)");
+		
+		$expect = file_get_contents(__DIR__."/scope.json");
+		$this->assertEquals($expect, $this->mathr->export());
+	}
+	
+	public function testCanImport()
+	{
+		$this->mathr->import(file_get_contents(__DIR__."/scope.json"));
+		$this->assertEquals($this->mathr->evaluate("rtN(8,3)"), 2);
+		$this->assertEquals($this->mathr->evaluate("fib(elefante)"), 13);
+	}
 }

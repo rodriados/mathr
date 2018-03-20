@@ -51,7 +51,12 @@ abstract class Node implements NodeInterface
 	}
 	
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
+	 */
+	abstract public function compress(): string;
+	
+	/**
+	 * {@inheritdoc}
 	 */
 	abstract public function evaluate(Scope $scope): Node;
 	
@@ -77,5 +82,4 @@ abstract class Node implements NodeInterface
 		
 		return new NullNode;
 	}
-	
 }
