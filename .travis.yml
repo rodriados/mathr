@@ -9,7 +9,7 @@ install:
 
 script:
   - mkdir -p build/logs
-  - php phpunit-6.2.3.phar --bootstrap tests/autoload.php tests -c phpunit.xml
+  - php phpunit-6.2.3.phar --bootstrap test/autoload.php test -c phpunit.xml
 
 after_success:
   - travis_retry php coveralls.phar
