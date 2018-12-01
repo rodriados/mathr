@@ -160,12 +160,12 @@ class Parser
 			elseif(!$this->expectingOperator || $this->inFunction)
 				throw ParserException::unexpected($token);
 			
-			while(
-				!$this->stack->isEmpty() &&
-				$this->stack->top()->is(Token::OPERATOR) &&
-				self::$prec[$this->stack->top()->getData()] >= self::$prec[$token->getData()] &&
-				!$token->is(Token::LEFT)
-			) {
+			while
+            (	!$this->stack->isEmpty()
+            &&  $this->stack->top()->is(Token::OPERATOR)
+            &&  self::$prec[$this->stack->top()->getData()] >= self::$prec[$token->getData()]
+            &&  !$token->is(Token::LEFT)
+            ) {
 				$this->output->push($this->stack->pop());
 			}
 			
@@ -195,9 +195,9 @@ class Parser
 		 * - If the operator in stack is a function, push to output;
 		 */
 		if($token->is(Token::PARENTHESES|Token::RIGHT)) {
-			while(
-				!$this->stack->isEmpty() &&
-				!$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
+			while
+            (   !$this->stack->isEmpty()
+            &&  !$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
 			) {
 				$this->output->push($this->stack->pop());
 			}
@@ -227,9 +227,9 @@ class Parser
 			if(!$this->expectingOperator || $this->inFunction)
 				throw ParserException::unexpected($token);
 			
-			while(
-				!$this->stack->isEmpty() &&
-				!$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
+			while
+            (   !$this->stack->isEmpty()
+            &&  !$this->stack->top()->is(Token::PARENTHESES|Token::LEFT)
 			) {
 				$this->output->push($this->stack->pop());
 			}
