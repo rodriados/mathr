@@ -39,9 +39,10 @@ class Tokenizer implements TokenizerInterface
      */
     public function tokenize(string $expression): void
     {
-        $this->tokens     = static::extract($this->expression);
+        $this->tokens     = static::extract($expression);
         $this->expression = $expression;
-        $this->position   = 0;
+
+        $this->rewind();
     }
 
     /**
@@ -153,7 +154,7 @@ class Tokenizer implements TokenizerInterface
      */
     public function key(): int
     {
-        return $this->current()->getPosition();
+        return $this->position;
     }
 
     /**
