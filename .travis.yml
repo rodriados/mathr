@@ -3,14 +3,15 @@ php:
   - 8.0
 
 install:
+  - curl -s https://getcomposer.org/installer | php
+  - php composer.phar install --dev --no-interaction
   - wget -O phpunit.phar https://phar.phpunit.de/phpunit-9.phar
-  - wget -O coveralls.phar https://github.com/php-coveralls/php-coveralls/releases/download/v2.4.2/php-coveralls.phar
 
 script:
   - mkdir -p build/logs
-  - php phpunit.phar --bootstrap test/autoload.php test -c phpunit.xml
+  - XDEBUG_MODE=coverage php phpunit.phar --bootstrap test/autoload.php test -c phpunit.xml
 
 after_success:
-  - travis_retry php coveralls.phar
+  - travis_retry php vendor/bin/php-coveralls -v
 
 sudo: false
