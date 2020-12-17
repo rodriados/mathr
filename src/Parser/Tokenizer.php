@@ -55,7 +55,7 @@ class Tokenizer implements TokenizerInterface
     {
         $success = preg_match_all(
             '#(?<number>(?:[0-9]*\.[0-9]+|[0-9]+\.?)(?:e[+-]?[0-9]+)?)'.    # Group 1: Number literals
-            '|(?<identifier>\p{L}[\p{L}0-9_]*)'.                            # Group 2: Identifiers
+            '|(?<identifier>\p{L}[\p{L}0-9_]*\(?)'.                         # Group 2: Identifiers
             '|(?<rop>[-+/*])'.                                              # Group 3: Right associativity operators
             '|(?<lop>[=^])'.                                                # Group 4: Left associativity operators
             '|(?<paren>[()])'.                                              # Group 5: Parentheses
@@ -72,7 +72,10 @@ class Tokenizer implements TokenizerInterface
         if (!$success)
             throw ParserException::invalidExpression();
 
-        return self::process($extracted);
+        return array_merge(
+            self::process($extracted),
+            [new Token(type: Token::EOS)]
+        );
     }
 
     /**
@@ -108,9 +111,9 @@ class Tokenizer implements TokenizerInterface
             'identifier' => new Token($data, $pos, type: Token::IDENTIFIER),
             'rop'        => new Token($data, $pos, type: Token::OPERATOR | Token::RIGHT),
             'lop'        => new Token($data, $pos, type: Token::OPERATOR | Token::LEFT),
-            'paren'      => new Token($data, $pos, type: self::pairType($data) | Token::PARENTHESES),
-            'bracket'    => new Token($data, $pos, type: self::pairType($data) | Token::BRACKETS),
-            'curly'      => new Token($data, $pos, type: self::pairType($data) | Token::CURLY),
+            'paren'      => new Token($data, $pos, type: Token::PARENTHESIS | self::pairType($data)),
+            'bracket'    => new Token($data, $pos, type: Token::BRACKETS | self::pairType($data)),
+            'curly'      => new Token($data, $pos, type: Token::CURLY | self::pairType($data)),
             'comma'      => new Token($data, $pos, type: Token::COMMA),
             default      => new Token($data, $pos, type: Token::UNKNOWN),
         };

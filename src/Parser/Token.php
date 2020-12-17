@@ -8,6 +8,8 @@
  */
 namespace Mathr\Parser;
 
+use Mathr\Parser\Node\OperatorNode;
+
 /**
  * The token extracted by a tokenizer.
  * @package Mathr\Parser
@@ -18,24 +20,51 @@ class Token
      * The token type constants.
      * These flags can be joined with flags of different types.
      */
-    const NUMBER      = 0x0001;
-    const IDENTIFIER  = 0x0002;
-    const OPERATOR    = 0x0004;
-    const FUNCTION    = 0x0008;
-    const PARENTHESES = 0x0010;
-    const BRACKETS    = 0x0020;
-    const CURLY       = 0x0040;
-    const COMMA       = 0x0080;
-    const UNKNOWN     = 0x8000;
+    public const NUMBER      = 0x0001;
+    public const IDENTIFIER  = 0x0002;
+    public const OPERATOR    = 0x0004;
+    public const PARENTHESIS = 0x0008;
+    public const BRACKETS    = 0x0010;
+    public const CURLY       = 0x0020;
+    public const COMMA       = 0x0040;
+    public const EOS         = 0x0080;
+    public const UNKNOWN     = 0x8000;
     /**#@-*/
 
     /**#@+
      * The token associativity constants.
      * These flags inform whether a token has a specific associativity.
      */
-    const RIGHT       = 0x0100;
-    const LEFT        = 0x0200;
+    public const RIGHT       = 0x1000;
+    public const LEFT        = 0x2000;
+    public const UNARY       = 0x4000;
     /**#@-*/
+
+    /**#@+
+     * Token type masks.
+     * These masks allow information to be extracted from the token's type.
+     */
+    public const TYPE_MASK   = 0x00FF;
+    public const ASSOC_MASK  = 0x7000;
+    /**#@-*/
+
+    /**
+     * Operators that may be unary.
+     * These are all operators that may become an unary token.
+     */
+    public const MAYBE_UNARY = [
+        OperatorNode::SUM,
+        OperatorNode::SUB,
+    ];
+
+    /**
+     * Unary translations.
+     * Informs all operator transformation to unary possibilities.
+     */
+    private const TO_UNARY    = [
+        OperatorNode::SUM => OperatorNode::POS,
+        OperatorNode::SUB => OperatorNode::NEG,
+    ];
 
     /**
      * Token constructor.
@@ -44,7 +73,7 @@ class Token
      * @param int $type The type of the parsed token.
      */
     public function __construct(
-        private string $data,
+        private string $data = "",
         private int $position = 0,
         private int $type = self::UNKNOWN,
     ) {}
@@ -78,11 +107,12 @@ class Token
 
     /**
      * Returns the token's type.
+     * @param int $mask The mask to apply to token type.
      * @return int The token's type.
      */
-    public function getType(): int
+    public function getType(int $mask = 0xFFFF): int
     {
-        return $this->type;
+        return $this->type & $mask;
     }
 
     /**
@@ -93,5 +123,17 @@ class Token
     public function is(int $check): bool
     {
         return $check == ($this->type & $check);
+    }
+
+    /**
+     * Transform an operator token into its unary counterpart, if possible.
+     * @param Token $token The token to be transformed.
+     * @return Token The new unary operator token.
+     */
+    public static function makeUnary(Token $token): Token
+    {
+        return $token->is(self::OPERATOR) && array_key_exists($token->data, self::TO_UNARY)
+            ? new static(self::TO_UNARY[$token->data], $token->position, self::OPERATOR | self::UNARY)
+            : $token;
     }
 }
