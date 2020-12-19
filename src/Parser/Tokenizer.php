@@ -74,7 +74,7 @@ class Tokenizer implements TokenizerInterface
 
         return array_merge(
             self::process($extracted),
-            [new Token(type: Token::EOS)]
+            [new Token(type: Token::EOS, position: strlen($expression))]
         );
     }
 
