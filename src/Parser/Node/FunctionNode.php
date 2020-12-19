@@ -32,6 +32,15 @@ class FunctionNode extends ParenthesisNode
     }
 
     /**
+     * Represents the node as a string.
+     * @return string The node's string representation.
+     */
+    public function __toString(): string
+    {
+        return $this->getData() . "[{$this->argCount}]";
+    }
+
+    /**
      * Retrieves the data represented by the node.
      * @return string The node's internal data.
      */

@@ -181,11 +181,11 @@ class Parser
     public function consumeOperator(Token $token): OperatorNode
     {
         if (!$this->expectOperator)
-            $token = self::tryMakeUnary($token);
+            $token = $this->tryMakeUnary($token);
 
         $current = new OperatorNode($token);
 
-        if ($current->getAssoc() != Token::LEFT)
+        if ($current->getAssoc() == Token::RIGHT)
             $this->sendOperatorsToOutput($current);
 
         $this->expectOperator = false;
@@ -220,6 +220,49 @@ class Parser
         return $token->is(ParenthesisNode::getOpeningPair())
             ? $this->consumeOpenPair($current)
             : $this->consumeClosePair($current);
+    }
+
+    /**
+     * Consumes an opening pair token.
+     * @param PairNode $current The opening pair's node.
+     * @return PairNode The opening pair's node.
+     * @throws ParserException An unexpected token when parsing.
+     */
+    private function consumeOpenPair(PairNode $current): PairNode
+    {
+        if ($this->expectOperator)
+            $this->consumeImplicitOperator($current->getToken());
+
+        $this->expectOperator = false;
+        $this->stack->push($current);
+
+        return $current;
+    }
+
+    /**
+     * Consumes a closing pair token.
+     * @param PairNode $current The closing pair's node.
+     * @return PairNode The closing pair's node.
+     * @throws ParserException The token is mismatched.
+     */
+    private function consumeClosePair(PairNode $current): PairNode
+    {
+        $this->sendOperatorsToOutput();
+
+        if ($this->stack->isEmpty())
+            throw ParserException::mismatchedToken($current->getToken());
+
+        $popped = $this->stack->pop();
+
+        if (!$popped instanceof PairNode)
+            throw ParserException::mismatchedToken($current->getToken());
+
+        $popped->close($current);
+
+        if ($popped instanceof FunctionNode)
+            $this->output->push($popped);
+
+        return $current;
     }
 
     /**
@@ -268,49 +311,6 @@ class Parser
     }
 
     /**
-     * Consumes an opening pair token.
-     * @param PairNode $current The opening pair's node.
-     * @return PairNode The opening pair's node.
-     * @throws ParserException An unexpected token when parsing.
-     */
-    private function consumeOpenPair(PairNode $current): PairNode
-    {
-        if ($this->expectOperator)
-            $this->consumeImplicitOperator($current->getToken());
-
-        $this->expectOperator = false;
-        $this->stack->push($current);
-
-        return $current;
-    }
-
-    /**
-     * Consumes a closing pair token.
-     * @param PairNode $current The closing pair's node.
-     * @return PairNode The closing pair's node.
-     * @throws ParserException The token is mismatched.
-     */
-    private function consumeClosePair(PairNode $current): PairNode
-    {
-        $this->sendOperatorsToOutput();
-
-        if ($this->stack->isEmpty())
-            throw ParserException::mismatchedToken($current->getToken());
-
-        $popped = $this->stack->pop();
-
-        if (!$popped instanceof PairNode)
-            throw ParserException::mismatchedToken($current->getToken());
-
-        $popped->close($current);
-
-        if ($popped instanceof FunctionNode)
-            $this->output->push($popped);
-
-        return $current;
-    }
-
-    /**
      * If the parsing is a function context, increment its argument count.
      * @return int|null The function's current argument count.
      */
@@ -353,10 +353,12 @@ class Parser
      * @return Token The unary token created.
      * @throws ParserException An unexpected token when parsing.
      */
-    private static function tryMakeUnary(Token $token): Token
+    private function tryMakeUnary(Token $token): Token
     {
         if (!in_array($token->getData(), Token::MAYBE_UNARY))
             throw ParserException::unexpectedToken($token);
+
+        $this->functionIncrement();
 
         return Token::makeUnary($token);
     }

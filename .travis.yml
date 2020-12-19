@@ -2,16 +2,20 @@ language: php
 php:
   - 8.0
 
+env:
+  global:
+    - XDEBUG_MODE=coverage
+
 install:
   - curl -s https://getcomposer.org/installer | php
-  - php composer.phar install --dev --no-interaction
   - wget -O phpunit.phar https://phar.phpunit.de/phpunit-9.phar
+  - wget -O php-coveralls.phar https://github.com/php-coveralls/php-coveralls/releases/download/v2.4.2/php-coveralls.phar
 
 script:
   - mkdir -p build/logs
-  - XDEBUG_MODE=coverage php phpunit.phar --bootstrap test/resources/autoload.php test -c phpunit.xml
+  - php phpunit.phar --bootstrap test/resources/autoload.php test -c phpunit.xml
 
 after_success:
-  - travis_retry php vendor/bin/php-coveralls -v
+  - travis_retry php coveralls.phar -v
 
 sudo: false

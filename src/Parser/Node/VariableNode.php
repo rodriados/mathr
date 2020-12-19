@@ -13,4 +13,13 @@ namespace Mathr\Parser\Node;
  * @package Mathr\Parser\Node
  */
 class VariableNode extends Node
-{}
+{
+    /**
+     * Represents the node as a string.
+     * @return string The node's string representation.
+     */
+    public function __toString(): string
+    {
+        return '$' . $this->getData();
+    }
+}
