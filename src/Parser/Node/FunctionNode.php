@@ -8,8 +8,6 @@
  */
 namespace Mathr\Parser\Node;
 
-use Mathr\Parser\Token;
-
 /**
  * Stores a function reference in an expession node.
  * @package Mathr\Parser\Node
@@ -20,16 +18,7 @@ class FunctionNode extends ParenthesisNode
      * Keeps track of the number of arguments passed to function.
      * @var int The total amount of function arguments.
      */
-    private int $argCount = 0;
-
-    /**
-     * FunctionNode constructor.
-     * @param Token $token The token represented by the node.
-     */
-    public function __construct(Token $token)
-    {
-        parent::__construct($token);
-    }
+    protected int $argCount = 0;
 
     /**
      * Represents the node as a string.
@@ -37,7 +26,7 @@ class FunctionNode extends ParenthesisNode
      */
     public function __toString(): string
     {
-        return $this->getData() . "[{$this->argCount}]";
+        return $this->getData() . "@{$this->argCount}";
     }
 
     /**

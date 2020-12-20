@@ -1,6 +1,6 @@
 <?php
 /**
- * Node for general parenthesis.
+ * Node for vectors.
  * @package Mathr\Parser\Node
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @copyright 2020-present Rodrigo Siqueira
@@ -11,18 +11,27 @@ namespace Mathr\Parser\Node;
 use Mathr\Parser\Token;
 
 /**
- * Represents a parenthesis grouping in an expression node.
+ * Stores a vector reference in an expression node.
  * @package Mathr\Parser\Node
  */
-class ParenthesisNode extends PairNode
+class VectorNode extends FunctionNode
 {
+    /**
+     * Retrieves the data represented by the node.
+     * @return string The node's internal data.
+     */
+    public function getData(): string
+    {
+        return '{}';
+    }
+
     /**
      * Indicates the required closing token type.
      * @return int The required closing token type.
      */
     public static function getOpeningPair(): int
     {
-        return Token::PARENTHESIS | Token::LEFT;
+        return Token::CURLY | Token::LEFT;
     }
 
     /**
@@ -31,6 +40,6 @@ class ParenthesisNode extends PairNode
      */
     public static function getClosingPair(): int
     {
-        return Token::PARENTHESIS | Token::RIGHT;
+        return Token::CURLY | Token::RIGHT;
     }
 }

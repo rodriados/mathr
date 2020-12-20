@@ -14,9 +14,11 @@ use Mathr\Parser\Node\NullNode;
 use Mathr\Evaluator\Expression;
 use Mathr\Parser\Node\PairNode;
 use Mathr\Parser\Node\NumberNode;
+use Mathr\Parser\Node\VectorNode;
 use Mathr\Parser\Node\FunctionNode;
 use Mathr\Parser\Node\VariableNode;
 use Mathr\Parser\Node\OperatorNode;
+use Mathr\Parser\Node\BracketsNode;
 use Mathr\Parser\Node\NodeInterface;
 use Mathr\Parser\Node\ParenthesisNode;
 
@@ -97,6 +99,8 @@ class Parser
             Token::IDENTIFIER  => $this->consumeIdentifier($token),
             Token::OPERATOR    => $this->consumeOperator($token),
             Token::PARENTHESIS => $this->consumeParenthesis($token),
+            Token::BRACKETS    => $this->consumeBrackets($token),
+            Token::CURLY       => $this->consumeCurly($token),
             Token::COMMA       => $this->consumeComma($token),
             Token::EOS         => $this->consumeEOS($token),
             default            => throw ParserException::unexpectedToken($token),
@@ -223,15 +227,52 @@ class Parser
     }
 
     /**
+     * Consumes a brackets token.
+     * @param Token $token The token to be consumed.
+     * @return PairNode The created node.
+     * @throws ParserException An unexpected or unmatched token when parsing.
+     */
+    private function consumeBrackets(Token $token): PairNode
+    {
+        $current = new BracketsNode($token);
+
+        if (!$this->expectOperator)
+            throw ParserException::unexpectedToken($token);
+
+        return $token->is(BracketsNode::getOpeningPair())
+            ? $this->consumeOpenPair($current, allowImplicit: false)
+            : $this->consumeClosePair($current);
+    }
+
+    /**
+     * Consumes a curly-brackets token.
+     * @param Token $token The token to be consumed.
+     * @return PairNode The created node.
+     * @throws ParserException An unexpected or unmatched token when parsing.
+     */
+    private function consumeCurly(Token $token): PairNode
+    {
+        $current = new VectorNode($token);
+
+        return $token->is(VectorNode::getOpeningPair())
+            ? $this->consumeOpenPair($current)
+            : $this->consumeClosePair($current);
+    }
+
+    /**
      * Consumes an opening pair token.
      * @param PairNode $current The opening pair's node.
+     * @param bool $allowImplicit Is the insertion of an implicit operator allowed?
      * @return PairNode The opening pair's node.
      * @throws ParserException An unexpected token when parsing.
      */
-    private function consumeOpenPair(PairNode $current): PairNode
+    private function consumeOpenPair(PairNode $current, bool $allowImplicit = true): PairNode
     {
-        if ($this->expectOperator)
+        if ($allowImplicit && $this->expectOperator)
             $this->consumeImplicitOperator($current->getToken());
+
+        if ($current instanceof VectorNode)
+            $this->functionIncrement();
 
         $this->expectOperator = false;
         $this->stack->push($current);
@@ -247,6 +288,9 @@ class Parser
      */
     private function consumeClosePair(PairNode $current): PairNode
     {
+        if (!$this->expectOperator)
+            throw ParserException::unexpectedToken($current->getToken());
+
         $this->sendOperatorsToOutput();
 
         if ($this->stack->isEmpty())
