@@ -32,7 +32,7 @@ class ParserException extends MathrException
      */
     public static function unexpectedToken(Token $token): static
     {
-        return new static("Unexpected token: '{$token->getData()}' at {$token->getPosition()}");
+        return new static("Unexpected token '{$token->getData()}' at {$token->getPosition()}.");
     }
 
     /**
@@ -42,6 +42,6 @@ class ParserException extends MathrException
      */
     public static function mismatchedToken(Token $token): static
     {
-        return new static("Mismatched token: '{$token->getData()}' at {$token->getPosition()}");
+        return new static("Mismatched token '{$token->getData()}' at {$token->getPosition()}.");
     }
 }

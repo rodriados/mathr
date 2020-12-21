@@ -338,7 +338,8 @@ class Parser
      */
     private function consumeEOS(Token $token): NullNode
     {
-        $this->sendOperatorsToOutput();
+        if ($this->expectOperator)
+            $this->sendOperatorsToOutput();
 
         if ($this->stack->isEmpty())
             return new NullNode($token);
