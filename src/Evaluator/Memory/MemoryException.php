@@ -9,7 +9,7 @@
 namespace Mathr\Evaluator\Memory;
 
 use Mathr\MathrException;
-use Mathr\Parser\Node\BindableNodeInterface;
+use Mathr\Interperter\Node\BindableNodeInterface;
 
 /**
  * Represents a memory frame exception.

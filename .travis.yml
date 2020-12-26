@@ -7,9 +7,8 @@ env:
     - XDEBUG_MODE=coverage
 
 install:
-  - curl -s https://getcomposer.org/installer | php
-  - wget -O phpunit.phar https://phar.phpunit.de/phpunit-9.phar
-  - wget -O php-coveralls.phar https://github.com/php-coveralls/php-coveralls/releases/download/v2.4.2/php-coveralls.phar
+  - wget -O phpunit.phar https://phar.phpunit.de/phpunit-9.5.phar
+  - wget -O php-coveralls.phar https://github.com/php-coveralls/php-coveralls/releases/download/v2.4.3/php-coveralls.phar
 
 script:
   - mkdir -p build/logs

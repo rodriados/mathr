@@ -8,8 +8,8 @@
  */
 namespace Mathr\Evaluator\Memory;
 
-use Mathr\Parser\Node\NodeInterface;
-use Mathr\Parser\Node\BindableNodeInterface;
+use Mathr\Interperter\Node\NodeInterface;
+use Mathr\Interperter\Node\BindableNodeInterface;
 
 /**
  * A constant memory with global functions and constants.

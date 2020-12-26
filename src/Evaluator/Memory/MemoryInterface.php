@@ -8,8 +8,8 @@
  */
 namespace Mathr\Evaluator\Memory;
 
-use Mathr\Parser\Node\BindableNodeInterface;
-use Mathr\Parser\Node\EvaluableNodeInterface;
+use Mathr\Interperter\Node\BindableNodeInterface;
+use Mathr\Interperter\Node\EvaluableNodeInterface;
 
 /**
  * The common operations to all memory types.

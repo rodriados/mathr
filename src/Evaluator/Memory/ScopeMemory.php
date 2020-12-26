@@ -8,11 +8,11 @@
  */
 namespace Mathr\Evaluator\Memory;
 
-use Mathr\Parser\Node\FunctionNode;
-use Mathr\Parser\Node\VariableNode;
-use Mathr\Parser\Node\NodeInterface;
-use Mathr\Parser\Node\BindableNodeInterface;
-use Mathr\Parser\Node\EvaluableNodeInterface;
+use Mathr\Interperter\Node\FunctionNode;
+use Mathr\Interperter\Node\VariableNode;
+use Mathr\Interperter\Node\NodeInterface;
+use Mathr\Interperter\Node\BindableNodeInterface;
+use Mathr\Interperter\Node\EvaluableNodeInterface;
 
 /**
  * Keeps track of a scope's variables and functions.

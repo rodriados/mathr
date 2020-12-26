@@ -8,7 +8,7 @@
  */
 namespace Mathr\Evaluator\Memory;
 
-use Mathr\Parser\Node\NodeInterface;
+use Mathr\Interperter\Node\NodeInterface;
 
 /**
  * Represents a memory frame for function call stacks.
