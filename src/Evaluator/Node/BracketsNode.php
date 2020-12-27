@@ -1,20 +1,18 @@
 <?php
 /**
- * Node for brackets.
- * @package Mathr\Parser\Node
+ * Node for brackets operator.
+ * @package Mathr\Evaluator\Node
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @copyright 2020-present Rodrigo Siqueira
  * @license MIT License
  */
-namespace Mathr\Interperter\Node;
-
-use Mathr\Interperter\Token;
+namespace Mathr\Evaluator\Node;
 
 /**
- * A syntax-sugar for the vector accessor function.
- * @package Mathr\Parser\Node
+ * Represents the brackets operator in an expression node.
+ * @package Mathr\Evaluator\Node
  */
-class BracketsNode extends FunctionNode
+class BracketsNode extends HierarchyNode
 {
     /**
      * Retrieves the data represented by the node.
@@ -22,24 +20,17 @@ class BracketsNode extends FunctionNode
      */
     public function getData(): string
     {
-        return '[]';
+        return "[]@{$this->getChildrenCount()}";
     }
 
     /**
-     * Indicates the required closing token type.
-     * @return int The required closing token type.
+     * Represents the node as a string.
+     * @return string The node's string representation.
      */
-    public static function getOpeningPair(): int
+    public function strRepr(): string
     {
-        return Token::BRACKETS | Token::LEFT;
-    }
-
-    /**
-     * Informs the expected closing token type.
-     * @return int The token type expected to close a parenthesis node.
-     */
-    public static function getClosingPair(): int
-    {
-        return Token::BRACKETS | Token::RIGHT;
+        $children = $this->getChildren();
+        $vector = array_shift($children);
+        return "{$vector->strRepr()}[{$this->strJoin($children)}]";
     }
 }

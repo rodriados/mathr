@@ -118,6 +118,29 @@ final class StatefulParserTest extends TestCase
     }
 
     /**
+     * Tests whether empty functions can be parsed.
+     * @since 3.0
+     */
+    public function testIfParsesEmptyFunctionExpression()
+    {
+        $testCase = "f() * (g() + h())";
+
+        $expected = [
+            new Token('f(',  0, Token::FUNCTION | Token::OPEN  ),
+            new Token('g(',  7, Token::FUNCTION | Token::OPEN  ),
+            new Token('h(', 13, Token::FUNCTION | Token::OPEN  ),
+            new Token( '+', 11, Token::OPERATOR | Token::RIGHT ),
+            new Token( '*',  4, Token::OPERATOR | Token::RIGHT ),
+        ];
+
+        /** @var TokenListExpressionBuilderMock $expression */
+        $expression = $this->parser->runParser($testCase);
+        $tokenList = $expression->getTokens();
+
+        $this->assertExpectedTokens($expected, $tokenList);
+    }
+
+    /**
      * Tests whether expressions with vectors can be parsed.
      * @since 3.0
      */
@@ -163,6 +186,19 @@ final class StatefulParserTest extends TestCase
     }
 
     /**
+     * Tests whether invalid expressions can be detected.
+     * @param string $expression The invalid expression.
+     * @dataProvider provideInvalidExpressions
+     * @since 3.0
+     */
+    public function testIfDetectsInvalidExpressions(string $expression)
+    {
+        $this->expectException(ParserException::class);
+        $this->expectExceptionMessageMatches("/Unexpected token '.' at position \d\./");
+        $this->parser->runParser($expression);
+    }
+
+    /**
      * Tests whether mismatched pair nodes can be detected.
      * @param string $expression The mismatched expression.
      * @dataProvider provideMismatchedExpressions
@@ -189,6 +225,20 @@ final class StatefulParserTest extends TestCase
             $this->assertEquals($expected[$pos]->getType(), $token->getType());
             $this->assertEquals($expected[$pos]->getPosition(), $token->getPosition());
         }
+    }
+
+    /**
+     * Provides invalid expressions for testing.
+     * @return string[][] The invalid expressions.
+     */
+    public function provideInvalidExpressions(): array
+    {
+        return [
+            [ '2 +' ],
+            [ '3 * ()' ],
+            [ 'func(,)' ],
+            [ 'func(2,)' ],
+        ];
     }
 
     /**

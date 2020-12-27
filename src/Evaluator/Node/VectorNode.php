@@ -1,20 +1,18 @@
 <?php
 /**
  * Node for vectors.
- * @package Mathr\Parser\Node
+ * @package Mathr\Evaluator\Node
  * @author Rodrigo Siqueira <rodriados@gmail.com>
- * @copyright 2020-present Rodrigo Siqueira
+ * @copyright 2017-present Rodrigo Siqueira
  * @license MIT License
  */
-namespace Mathr\Interperter\Node;
-
-use Mathr\Interperter\Token;
+namespace Mathr\Evaluator\Node;
 
 /**
- * Stores a vector reference in an expression node.
- * @package Mathr\Parser\Node
+ * Represents a vector in an expression node.
+ * @package Mathr\Evaluator\Node
  */
-class VectorNode extends FunctionNode
+class VectorNode extends HierarchyNode
 {
     /**
      * Retrieves the data represented by the node.
@@ -22,24 +20,16 @@ class VectorNode extends FunctionNode
      */
     public function getData(): string
     {
-        return '{}';
+        return "{}@{$this->getChildrenCount()}";
     }
 
     /**
-     * Indicates the required closing token type.
-     * @return int The required closing token type.
+     * Represents the node as a string.
+     * @return string The node's string representation.
      */
-    public static function getOpeningPair(): int
+    public function strRepr(): string
     {
-        return Token::CURLY | Token::LEFT;
-    }
-
-    /**
-     * Informs the expected closing token type.
-     * @return int The token type expected to close a parenthesis node.
-     */
-    public static function getClosingPair(): int
-    {
-        return Token::CURLY | Token::RIGHT;
+        $children = $this->getChildren();
+        return sprintf('{%s}', $this->strJoin($children));
     }
 }

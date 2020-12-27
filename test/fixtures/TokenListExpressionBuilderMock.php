@@ -8,6 +8,7 @@
  */
 
 use Mathr\Contracts\Interperter\TokenInterface;
+use Mathr\Contracts\Evaluator\ExpressionInterface;
 use Mathr\Contracts\Evaluator\ExpressionBuilderInterface;
 
 /**
@@ -23,12 +24,12 @@ class TokenListExpressionBuilderMock implements ExpressionBuilderInterface
     private array $list = [];
 
     /**
-     * Pushes a token into the expression builder.
-     * @param TokenInterface $token The token to be pushed into the expression.
+     * Retrieves the built expression.
+     * @return ExpressionInterface The built expression instance.
      */
-    public function push(TokenInterface $token): void
+    public function getExpression(): ExpressionInterface
     {
-        array_push($this->list, $token);
+        throw new RuntimeException('The method is not implemented.');
     }
 
     /**
@@ -38,5 +39,15 @@ class TokenListExpressionBuilderMock implements ExpressionBuilderInterface
     public function getTokens(): array
     {
         return $this->list;
+    }
+
+    /**
+     * Pushes a token into the expression builder.
+     * @param TokenInterface $token The token to be pushed into the expression.
+     * @param int|null $argc The number of arguments the token must take.
+     */
+    public function push(TokenInterface $token, int $argc = null): void
+    {
+        array_push($this->list, $token);
     }
 }

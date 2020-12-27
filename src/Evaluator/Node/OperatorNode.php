@@ -1,96 +1,80 @@
 <?php
 /**
  * Node for operators.
- * @package Mathr\Parser\Node
+ * @package Mathr\Evaluator\Node
  * @author Rodrigo Siqueira <rodriados@gmail.com>
- * @copyright 2020-present Rodrigo Siqueira
+ * @copyright 2017-present Rodrigo Siqueira
  * @license MIT License
  */
-namespace Mathr\Interperter\Node;
+namespace Mathr\Evaluator\Node;
 
 use Mathr\Interperter\Token;
-use Mathr\Interperter\ParserException;
+use Mathr\Contracts\Evaluator\NodeInterface;
 
 /**
- * Stores an operator reference in an expression node.
- * @package Mathr\Parser\Node
+ * Represents a node in an expression node.
+ * @package Mathr\Evaluator\Node
  */
-class OperatorNode extends Node
+class OperatorNode extends HierarchyNode
 {
-    /**#@+
-     * The operators' symbols.
-     * Informs the symbol representation of each operator.
-     */
-    public const EQL = '=';
-    public const SUM = '+';
-    public const SUB = '-';
-    public const MUL = '*';
-    public const DIV = '/';
-    public const PWR = '^';
-    public const POS = 'U+';
-    public const NEG = 'U-';
-    /**#@-*/
-
     /**
      * The operators' precedence.
      * Informs the order in which operators must be evaluated.
      */
-    private const PRECEDENCE = [
-        self::EQL =>  0,
-        self::SUM =>  2,
-        self::SUB =>  2,
-        self::MUL =>  3,
-        self::DIV =>  3,
-        self::PWR =>  4,
-        self::POS => 10,
-        self::NEG => 10,
+    public const PRECEDENCE = [
+        Token::OP_EQL =>  0,
+        Token::OP_SUM =>  2,
+        Token::OP_SUB =>  2,
+        Token::OP_MUL =>  3,
+        Token::OP_DIV =>  3,
+        Token::OP_PWR =>  4,
+        Token::OP_POS => 10,
+        Token::OP_NEG => 10,
     ];
 
     /**
-     * The list of unary operators.
-     * Informs which operators are unary and only require one argument.
+     * Represents the node as a string.
+     * @return string The node's string representation.
      */
-    private const UNARY = [
-        self::POS,
-        self::NEG,
-    ];
-
-    /**
-     * The operator's associativity, either left or right.
-     * @var int The operator's associativity.
-     */
-    private int $assoc;
-
-    /**
-     * OperatorNode constructor.
-     * @param Token $token The token represented by the node.
-     * @throws ParserException Invalid operator detected.
-     */
-    public function __construct(Token $token)
+    public function strRepr(): string
     {
-        if (!array_key_exists($token->getData(), self::PRECEDENCE))
-            throw ParserException::unexpectedToken($token);
-
-        $this->assoc = $token->getType(Token::ASSOC_MASK);
-
-        parent::__construct($token);
+        return $this->getChildrenCount() == 1
+            ? $this->strReprUnary()
+            : $this->strReprBinary();
     }
 
     /**
-     * Informs whether the node's operator has a left or right associativity.
-     * @return int The operator's associativity.
+     * Represents the unary operator as a string.
+     * @return string The node's string representation.
      */
-    public function getAssoc(): int
+    private function strReprUnary(): string
     {
-        return $this->assoc;
+        [$child] = $this->getChildren();
+        return sprintf('%s%s', $this->getData()[0], $this->strChild($child));
     }
 
     /**
-     * Retrieves the node's operator precedence.
-     * @return int The operator's precedence.
+     * Represents the binary operator as a string.
+     * @return string The node's string representation.
      */
-    public function getPrecedence(): int
+    private function strReprBinary(): string
     {
-        return self::PRECEDENCE[$this->getData()];
+        [$left, $right] = $this->getChildren();
+        return sprintf('%s %s %s', $this->strChild($left), $this->getData()[0], $this->strChild($right));
+    }
+
+    /**
+     * Represents a child node as a string.
+     * @param NodeInterface $child The child node to be represented as string.
+     * @return string The child's string representation.
+     */
+    private function strChild(NodeInterface $child): string
+    {
+        if (!$child instanceof OperatorNode)
+            return $child->strRepr();
+
+        return self::PRECEDENCE[$child->getData()] <= self::PRECEDENCE[$this->getData()]
+            ? sprintf('(%s)', $child->strRepr())
+            : $child->strRepr();
     }
 }

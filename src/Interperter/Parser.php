@@ -8,6 +8,7 @@
  */
 namespace Mathr\Interperter;
 
+use Mathr\Evaluator\Node\OperatorNode;
 use Mathr\Contracts\Interperter\TokenInterface;
 use Mathr\Contracts\Interperter\ParserException;
 use Mathr\Contracts\Interperter\ParserInterface;
@@ -20,21 +21,6 @@ use Mathr\Contracts\Interperter\TokenizerInterface;
  */
 abstract class Parser implements ParserInterface
 {
-    /**
-     * The operators' precedence.
-     * Informs the order in which operators must be evaluated.
-     */
-    protected const PRECEDENCE = [
-        Token::OP_EQL =>  0,
-        Token::OP_SUM =>  2,
-        Token::OP_SUB =>  2,
-        Token::OP_MUL =>  3,
-        Token::OP_DIV =>  3,
-        Token::OP_PWR =>  4,
-        Token::OP_POS => 10,
-        Token::OP_NEG => 10,
-    ];
-
     /**
      * Parser constructor.
      * @param TokenizerInterface $tokenizer The tokenizer to use when parsing.
@@ -62,8 +48,8 @@ abstract class Parser implements ParserInterface
      */
     protected static function comparePrecedence(TokenInterface $a, TokenInterface $b): ?int
     {
-        return isset(self::PRECEDENCE[$a->getData()], self::PRECEDENCE[$b->getData()])
-            ? self::PRECEDENCE[$a->getData()] <=> self::PRECEDENCE[$b->getData()]
+        return isset(OperatorNode::PRECEDENCE[$a->getData()], OperatorNode::PRECEDENCE[$b->getData()])
+            ? OperatorNode::PRECEDENCE[$a->getData()] <=> OperatorNode::PRECEDENCE[$b->getData()]
             : null;
     }
 

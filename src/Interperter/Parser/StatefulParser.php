@@ -233,6 +233,14 @@ class StatefulParser extends Parser
      */
     private static function consumeParenthesis(object $state, TokenInterface $token): object
     {
+        // If the parenthesis we are closing corresponds to a function we have just
+        // opened and it hasn't taken any arguments, then it is an atomic function,
+        // therefore it is a valid construct as long as an operator comes next.
+        if (!$state->expectOperator && $token->isOf(Token::CLOSE))
+            if($state->stack->top()[0]?->isOf(Token::FUNCTION))
+                if($state->stack->top()[1] == 0)
+                    $state->expectOperator = true;
+
         return $token->isOf(Token::OPEN)
             ? self::consumePairOpen($state, $token)
             : self::consumePairClose($state, $token);
@@ -250,7 +258,9 @@ class StatefulParser extends Parser
         if (!$state->expectOperator)
             throw ParserException::tokenIsUnexpected($token);
 
-        return self::consumeParenthesis($state, $token);
+        return $token->isOf(Token::OPEN)
+            ? self::consumePairOpen($state, $token)
+            : self::consumePairClose($state, $token);
     }
 
     /**
@@ -262,7 +272,9 @@ class StatefulParser extends Parser
      */
     private static function consumeCurlyBraces(object $state, TokenInterface $token): object
     {
-        return self::consumeParenthesis($state, $token);
+        return $token->isOf(Token::OPEN)
+            ? self::consumePairOpen($state, $token)
+            : self::consumePairClose($state, $token);
     }
 
     /**

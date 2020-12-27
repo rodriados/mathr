@@ -17,8 +17,15 @@ use Mathr\Contracts\Interperter\TokenInterface;
 interface ExpressionBuilderInterface
 {
     /**
+     * Retrieves the built expression.
+     * @return ExpressionInterface The built expression instance.
+     */
+    public function getExpression(): ExpressionInterface;
+
+    /**
      * Pushes a token into the expression builder.
      * @param TokenInterface $token The token to be pushed into the expression.
+     * @param int|null $argc The number of arguments the token must take.
      */
-    public function push(TokenInterface $token): void;
+    public function push(TokenInterface $token, int $argc = null): void;
 }
