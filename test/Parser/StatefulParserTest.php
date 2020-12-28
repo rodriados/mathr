@@ -235,9 +235,13 @@ final class StatefulParserTest extends TestCase
     {
         return [
             [ '2 +' ],
+            [ '3 5' ],
+            [ '(1,2)' ],
             [ '3 * ()' ],
             [ 'func(,)' ],
             [ 'func(2,)' ],
+            [ 'func(*3)' ],
+            [ 'func([1])' ],
         ];
     }
 

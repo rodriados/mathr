@@ -22,7 +22,7 @@ class FunctionNode extends HierarchyNode implements StorableNodeInterface
      */
     public function getData(): string
     {
-        return substr($this->token->getData(), 0, -1);
+        return str_replace('(', '', $this->token->getData());
     }
 
     /**
