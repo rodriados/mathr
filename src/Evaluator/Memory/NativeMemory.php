@@ -3,13 +3,13 @@
  * The native memory with global functions and constants.
  * @package Mathr\Evaluator\Memory
  * @author Rodrigo Siqueira <rodriados@gmail.com>
- * @copyright 2020-present Rodrigo Siqueira
+ * @copyright 2017-present Rodrigo Siqueira
  * @license MIT License
  */
 namespace Mathr\Evaluator\Memory;
 
-use Mathr\Interperter\Node\NodeInterface;
-use Mathr\Interperter\Node\BindableNodeInterface;
+use Mathr\Evaluator\Memory;
+use Mathr\Contracts\Evaluator\StorableNodeInterface;
 
 /**
  * A constant memory with global functions and constants.
@@ -17,6 +17,8 @@ use Mathr\Interperter\Node\BindableNodeInterface;
  */
 class NativeMemory extends Memory
 {
+    use ImmutableMemory;
+
     /**
      * The list of native constants and functions.
      * @var array The map of native constants and functions.
@@ -42,40 +44,13 @@ class NativeMemory extends Memory
 
     /**
      * Retrieves a function or variable from the memory.
-     * @param BindableNodeInterface $node The node to retrieve the contents of.
-     * @return NodeInterface|null The requested node's contents.
-     * @throws MemoryException The node binding was rejected.
+     * @param StorableNodeInterface $node The node to retrieve the contents of.
+     * @return mixed The requested node's contents.
      */
-    public function get(BindableNodeInterface $node): ?BindableNodeInterface
+    public function get(StorableNodeInterface $node): mixed
     {
-        $request = (string) $node;
-        $binding = $this->retrieveBinding($request);
-
-        if (!is_null($binding))
-            $node->bind($binding);
-
-        return $binding ? $node : null;
-    }
-
-    /**
-     * Throws an exception, because native memory is immutable.
-     * @param BindableNodeInterface $node The node to put the contents of.
-     * @param NodeInterface $contents The target node's contents.
-     * @throws MemoryException A native memory is immutable.
-     */
-    public function put(BindableNodeInterface $node, NodeInterface $contents): void
-    {
-        throw MemoryException::immutableMemory();
-    }
-
-    /**
-     * Throws an exception, because native memory is immutable.
-     * @param BindableNodeInterface $node The node to be removed.
-     * @throws MemoryException A native memory is immutable.
-     */
-    public function delete(BindableNodeInterface $node): void
-    {
-        throw MemoryException::immutableMemory();
+        $storageId = $node->getStorageId();
+        return $this->retrieveBinding($storageId);
     }
 
     /**
