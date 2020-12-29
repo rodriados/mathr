@@ -8,11 +8,11 @@
  */
 
 use Mathr\Evaluator\Memory;
-use Mathr\Interperter\Token;
 use Mathr\Evaluator\Node\NumberNode;
 use Mathr\Evaluator\Node\FunctionNode;
 use Mathr\Evaluator\Memory\NativeMemory;
 use Mathr\Evaluator\Node\IdentifierNode;
+use Mathr\Contracts\Evaluator\MemoryException;
 use Mathr\Contracts\Evaluator\MemoryInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -57,7 +57,7 @@ final class NativeMemoryTest extends TestCase
      */
     public function testIfCanGetNativeConstants(string $name, float $expected)
     {
-        $node = new IdentifierNode(new Token($name));
+        $node = IdentifierNode::make($name);
         $this->assertEquals($expected, $this->memory->get($node));
     }
 
@@ -71,16 +71,35 @@ final class NativeMemoryTest extends TestCase
      */
     public function testIfCanGetNativeFunctions(string $name, array $args, callable $expected)
     {
-        $node = new FunctionNode(
-            token: new Token($name),
-            children: array_map(fn ($x) => new NumberNode(new Token($x)), $args)
-        );
+        $node = FunctionNode::make($name, array_map(fn ($x) => NumberNode::make($x), $args));
 
         $expected = $expected (...$args);
         $retrieved = $this->memory->get($node);
 
         if (is_nan($expected)) $this->assertNan($retrieved (...$args));
-        else                   $this->assertEquals($expected, $retrieved (...$args));
+        else $this->assertEquals($expected, $retrieved (...$args));
+    }
+
+    /**
+     * Checks whether immutability is preserved when trying to bind new nodes.
+     * @since 3.0
+     */
+    public function testIfBindingsCannotBeCreated()
+    {
+        $this->expectException(MemoryException::class);
+        $this->expectExceptionMessage('An immutable memory cannot be changed.');
+        $this->memory->put(IdentifierNode::make('value'), []);
+    }
+
+    /**
+     * Checks whether immutability is preserved when trying to delete a binding.
+     * @since 3.0
+     */
+    public function testIfBindingsCannotBeDeleted()
+    {
+        $this->expectException(MemoryException::class);
+        $this->expectExceptionMessage('An immutable memory cannot be changed.');
+        $this->memory->delete(IdentifierNode::make('pi'));
     }
 
     /**

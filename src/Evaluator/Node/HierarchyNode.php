@@ -10,6 +10,7 @@ namespace Mathr\Evaluator\Node;
 
 use Mathr\Evaluator\Node;
 use Mathr\Contracts\Evaluator\NodeInterface;
+use Mathr\Contracts\Evaluator\MemoryInterface;
 use Mathr\Contracts\Interperter\TokenInterface;
 
 /**
@@ -21,7 +22,7 @@ abstract class HierarchyNode extends Node
     /**
      * HierarchyNode constructor.
      * @param TokenInterface $token The token represented by the node.
-     * @param NodeInterface[] $children The node's argument list.
+     * @param NodeInterface[] $children The node's hierarchical children.
      */
     public function __construct(
         TokenInterface $token,
@@ -31,31 +32,53 @@ abstract class HierarchyNode extends Node
     }
 
     /**
-     * Gives access to the node's children.
-     * @return NodeInterface[] The list of children.
+     * Gives access to the node's hierarchy.
+     * @return NodeInterface[] The node's hierarchical children.
      */
-    protected function getChildren(): array
+    protected function getHierarchy(): array
     {
         return $this->children;
     }
 
     /**
-     * Informs the node's total number of children.
-     * @return int The node's children count.
+     * Informs the node's total number of nodes in hierarchy.
+     * @return int The node's hierarchy count.
      */
-    protected function getChildrenCount(): int
+    protected function getHierarchyCount(): int
     {
-        return count($this->getChildren());
+        return count($this->getHierarchy());
     }
 
     /**
-     * Creates the joined string representation of many nodes.
-     * @param NodeInterface[] $children The node's children.
-     * @return string The children's string representation.
+     * Evaluates all nodes in hierarchy and return their results.
+     * @param MemoryInterface $memory The memory to lookup for bindings.
+     * @return NodeInterface[] The produced resulting nodes.
      */
-    protected function strJoin(array $children): string
+    protected function evaluateHierarchy(MemoryInterface $memory): array
     {
-        $mapper = fn (NodeInterface $node) => $node->strRepr();
-        return join(', ', array_map($mapper, $children));
+        $lambda = fn (NodeInterface $child) => $child->evaluate($memory);
+        return array_map($lambda, $this->getHierarchy());
+    }
+
+    /**
+     * Creates the joined string representation of nodes in hierarchy.
+     * @param NodeInterface[] $hierarchy The node's hierarchy.
+     * @return string The hierarchy's string representation.
+     */
+    protected static function strHierarchy(array $hierarchy): string
+    {
+        $lambda = fn (NodeInterface $node) => $node->strRepr();
+        return join(', ', array_map($lambda, $hierarchy));
+    }
+
+    /**
+     * Checks whether all nodes on the given list are number nodes.
+     * @param NodeInterface[] $nodes The list of nodes to be checked.
+     * @return bool Do all nodes on the list represent a number?
+     */
+    final protected static function allOfNumbers(array $nodes): bool
+    {
+        $lambda = fn (bool $carry, $node) => $carry && $node instanceof NumberNode;
+        return array_reduce($nodes, $lambda, true);
     }
 }

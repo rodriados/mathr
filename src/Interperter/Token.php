@@ -81,6 +81,21 @@ class Token implements TokenInterface
     /**#@-*/
 
     /**
+     * Operators associativity.
+     * Informs the associativity of each operator.
+     */
+    public const OP_ASSOC    = [
+        self::OP_EQL => self::LEFT,
+        self::OP_SUM => self::RIGHT,
+        self::OP_SUB => self::RIGHT,
+        self::OP_MUL => self::RIGHT,
+        self::OP_DIV => self::RIGHT,
+        self::OP_PWR => self::LEFT,
+        self::OP_POS => self::UNARY,
+        self::OP_NEG => self::UNARY,
+    ];
+
+    /**
      * Unary translations.
      * Informs all operator transformation to unary possibilities.
      */

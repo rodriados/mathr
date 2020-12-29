@@ -15,6 +15,13 @@ namespace Mathr\Contracts\Evaluator;
 interface ExpressionInterface
 {
     /**
+     * Evaluates the node and produces a result.
+     * @param MemoryInterface $memory The memory to lookup for bindings.
+     * @return NodeInterface The produced resulting node.
+     */
+    public function evaluate(MemoryInterface $memory): NodeInterface;
+
+    /**
      * Represents the node as a string.
      * @return string The node's string representation.
      */

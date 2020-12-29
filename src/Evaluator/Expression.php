@@ -9,6 +9,7 @@
 namespace Mathr\Evaluator;
 
 use Mathr\Contracts\Evaluator\NodeInterface;
+use Mathr\Contracts\Evaluator\MemoryInterface;
 use Mathr\Contracts\Evaluator\ExpressionInterface;
 
 /**
@@ -24,6 +25,16 @@ class Expression implements ExpressionInterface
     public function __construct(
         protected NodeInterface $root
     ) {}
+
+    /**
+     * Evaluates the node and produces a result.
+     * @param MemoryInterface $memory The memory to lookup for bindings.
+     * @return NodeInterface The produced resulting node.
+     */
+    public function evaluate(MemoryInterface $memory): NodeInterface
+    {
+        return $this->root->evaluate($memory);
+    }
 
     /**
      * Represents the node as a string.

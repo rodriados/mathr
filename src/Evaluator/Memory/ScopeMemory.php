@@ -53,7 +53,7 @@ class ScopeMemory extends Memory implements MemoryStackInterface
     public function get(StorableNodeInterface $node): mixed
     {
         return $this->mapping[$node->getStorageId()]
-            ?? $this->parent?->get($node);
+            ?? $this->getParentMemory()?->get($node);
     }
 
     /**

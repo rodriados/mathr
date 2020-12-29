@@ -38,7 +38,7 @@ class FrameMemory extends Memory implements MemoryStackInterface
     public function get(StorableNodeInterface $node): mixed
     {
         return $this->bindings[$node->getStorageId()]
-            ?? $this->parent->get($node);
+            ?? $this->getParentMemory()->get($node);
     }
 
     /**
@@ -49,8 +49,8 @@ class FrameMemory extends Memory implements MemoryStackInterface
      */
     public function pushFrame(array $bindings): MemoryStackInterface
     {
-        if ($this->parent instanceof MemoryStackInterface)
-            return $this->parent->pushFrame($bindings);
+        if ($this->getParentMemory() instanceof MemoryStackInterface)
+            return $this->getParentMemory()->pushFrame($bindings);
 
         throw MemoryException::stackOverflow();
     }
@@ -61,8 +61,8 @@ class FrameMemory extends Memory implements MemoryStackInterface
      */
     public function popFrame(): void
     {
-        if ($this->parent instanceof MemoryStackInterface)
-            $this->parent->popFrame();
+        if ($this->getParentMemory() instanceof MemoryStackInterface)
+            $this->getParentMemory()->popFrame();
 
         throw MemoryException::stackIsEmpty();
     }
