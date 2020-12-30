@@ -20,7 +20,7 @@ class EvaluationException extends MathrException
     public static function cannotApplyBrackets(NodeInterface $node): static
     {
         return new static(
-            sprintf("Brackets operator cannot be applied to expression '%s'.", $node->strRepr())
+            sprintf("Brackets operator cannot be applied to expression '%s'", $node->strRepr())
         );
     }
 
@@ -32,7 +32,7 @@ class EvaluationException extends MathrException
     public static function functionIsNotFound(NodeInterface $node): static
     {
         return new static(
-            sprintf("Could not find function '%s' with the given parameters.", $node->getData())
+            sprintf("Could not find function '%s' with the given parameters", $node->getData())
         );
     }
 
@@ -42,7 +42,18 @@ class EvaluationException extends MathrException
      */
     public static function functionExpectedStackMemory(): static
     {
-        return new static("A memory stack frame is expected when evaluating functions.");
+        return new static("A memory stack frame is expected when evaluating functions");
     }
 
+    /**
+     * An unknown operator was detected while evaluating an expression.
+     * @param NodeInterface $node The unknown operator detected.
+     * @return static The exception to be thrown.
+     */
+    public static function operatorIsInvalid(NodeInterface $node): static
+    {
+        return new static(
+            sprintf("Could not evaluate unknown operator '%s'", $node->getData())
+        );
+    }
 }

@@ -23,7 +23,7 @@ class TokenizerException extends MathrException
     public static function expressionIsInvalid(): static
     {
         return new static(
-            "The expression is invalid and could not be parsed."
+            "The expression is invalid and could not be parsed"
         );
     }
 }

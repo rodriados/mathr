@@ -87,7 +87,7 @@ final class NativeMemoryTest extends TestCase
     public function testIfBindingsCannotBeCreated()
     {
         $this->expectException(MemoryException::class);
-        $this->expectExceptionMessage('An immutable memory cannot be changed.');
+        $this->expectExceptionMessage('An immutable memory cannot be changed');
         $this->memory->put(IdentifierNode::make('value'), []);
     }
 
@@ -98,7 +98,7 @@ final class NativeMemoryTest extends TestCase
     public function testIfBindingsCannotBeDeleted()
     {
         $this->expectException(MemoryException::class);
-        $this->expectExceptionMessage('An immutable memory cannot be changed.');
+        $this->expectExceptionMessage('An immutable memory cannot be changed');
         $this->memory->delete(IdentifierNode::make('pi'));
     }
 

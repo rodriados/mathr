@@ -194,7 +194,7 @@ final class StatefulParserTest extends TestCase
     public function testIfDetectsInvalidExpressions(string $expression)
     {
         $this->expectException(ParserException::class);
-        $this->expectExceptionMessageMatches("/Unexpected token '.' at position \d\./");
+        $this->expectExceptionMessageMatches("/Unexpected token '.' at position \d/");
         $this->parser->runParser($expression);
     }
 
@@ -207,7 +207,7 @@ final class StatefulParserTest extends TestCase
     public function testIfDetectsMismatches(string $expression)
     {
         $this->expectException(ParserException::class);
-        $this->expectExceptionMessageMatches("/^Mismatched token '.' at position \d\.$/");
+        $this->expectExceptionMessageMatches("/^Mismatched token '.' at position \d$/");
         $this->parser->runParser($expression);
     }
 

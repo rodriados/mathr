@@ -24,7 +24,7 @@ class NodeException extends MathrException
     public static function numericWasExpected(mixed $value): static
     {
         return new static(
-            sprintf("A numeric value is expected but '%s' was received.", $value)
+            sprintf("A numeric value is expected but '%s' was received", $value)
         );
     }
 }

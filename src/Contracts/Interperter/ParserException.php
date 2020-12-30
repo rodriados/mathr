@@ -24,7 +24,7 @@ class ParserException extends MathrException
     public static function tokenIsUnexpected(TokenInterface $token): static
     {
         return new static(
-            sprintf("Unexpected token '%s' at position %d.", $token->getData(), $token->getPosition())
+            sprintf("Unexpected token '%s' at position %d", $token->getData(), $token->getPosition())
         );
     }
 
@@ -36,7 +36,7 @@ class ParserException extends MathrException
     public static function tokenIsMismatched(TokenInterface $token): static
     {
         return new static(
-            sprintf("Mismatched token '%s' at position %d.", $token->getData(), $token->getPosition())
+            sprintf("Mismatched token '%s' at position %d", $token->getData(), $token->getPosition())
         );
     }
 }

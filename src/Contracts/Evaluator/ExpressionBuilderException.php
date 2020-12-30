@@ -25,7 +25,7 @@ class ExpressionBuilderException extends MathrException
     public static function tokenIsInvalid(TokenInterface $token): static
     {
         return new static(
-            sprintf("The token '%s' is invalid when building an expression.", $token->getData())
+            sprintf("The token '%s' is invalid when building an expression", $token->getData())
         );
     }
 
@@ -35,6 +35,6 @@ class ExpressionBuilderException extends MathrException
      */
     public static function argumentsAreNotEnough(): static
     {
-        return new static("Not enough nodes found when building the expression.");
+        return new static("Not enough nodes found when building the expression");
     }
 }

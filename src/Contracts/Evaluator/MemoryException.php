@@ -22,7 +22,7 @@ class MemoryException extends MathrException
      */
     public static function memoryIsImmutable(): static
     {
-        return new static("An immutable memory cannot be changed.");
+        return new static("An immutable memory cannot be changed");
     }
 
     /**
@@ -31,7 +31,7 @@ class MemoryException extends MathrException
      */
     public static function stackOverflow(): static
     {
-        return new static("The function-call stack is too deep!");
+        return new static("The function-call stack is too deep");
     }
 
     /**
@@ -40,6 +40,6 @@ class MemoryException extends MathrException
      */
     public static function stackIsEmpty(): static
     {
-        return new static("The function-call stack is empty.");
+        return new static("The function-call stack is empty");
     }
 }
