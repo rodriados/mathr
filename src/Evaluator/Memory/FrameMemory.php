@@ -49,10 +49,10 @@ class FrameMemory extends Memory implements MemoryStackInterface
      */
     public function pushFrame(array $bindings): MemoryStackInterface
     {
-        if ($this->getParentMemory() instanceof MemoryStackInterface)
-            return $this->getParentMemory()->pushFrame($bindings);
+        if (!$this->getParentMemory() instanceof MemoryStackInterface)
+            throw MemoryException::stackOverflow();
 
-        throw MemoryException::stackOverflow();
+        return $this->getParentMemory()->pushFrame($bindings);
     }
 
     /**
@@ -61,9 +61,9 @@ class FrameMemory extends Memory implements MemoryStackInterface
      */
     public function popFrame(): void
     {
-        if ($this->getParentMemory() instanceof MemoryStackInterface)
-            $this->getParentMemory()->popFrame();
+        if (!$this->getParentMemory() instanceof MemoryStackInterface)
+            throw MemoryException::stackIsEmpty();
 
-        throw MemoryException::stackIsEmpty();
+        $this->getParentMemory()->popFrame();
     }
 }

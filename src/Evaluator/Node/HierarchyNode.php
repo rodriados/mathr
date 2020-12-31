@@ -22,11 +22,11 @@ abstract class HierarchyNode extends Node
     /**
      * HierarchyNode constructor.
      * @param TokenInterface $token The token represented by the node.
-     * @param NodeInterface[] $children The node's hierarchical children.
+     * @param NodeInterface[] $hierarchy The node's hierarchical children.
      */
     public function __construct(
         TokenInterface $token,
-        protected array $children = []
+        protected array $hierarchy = []
     ) {
         parent::__construct($token);
     }
@@ -35,16 +35,16 @@ abstract class HierarchyNode extends Node
      * Gives access to the node's hierarchy.
      * @return NodeInterface[] The node's hierarchical children.
      */
-    protected function getHierarchy(): array
+    public function getHierarchy(): array
     {
-        return $this->children;
+        return $this->hierarchy;
     }
 
     /**
      * Informs the node's total number of nodes in hierarchy.
      * @return int The node's hierarchy count.
      */
-    protected function getHierarchyCount(): int
+    public function getHierarchyCount(): int
     {
         return count($this->getHierarchy());
     }

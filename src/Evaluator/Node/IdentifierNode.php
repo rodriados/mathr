@@ -27,7 +27,7 @@ class IdentifierNode extends Node implements StorableNodeInterface
      */
     public function getStorageId(): string
     {
-        return "\${$this->getData()}";
+        return sprintf('$%s', $this->getData());
     }
 
     /**

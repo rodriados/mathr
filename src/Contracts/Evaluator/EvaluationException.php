@@ -10,6 +10,10 @@ namespace Mathr\Contracts\Evaluator;
 
 use Mathr\Contracts\MathrException;
 
+/**
+ * Represents an exception thrown while an expression is evaluated.
+ * @package Mathr\Contracts\Evaluator
+ */
 class EvaluationException extends MathrException
 {
     /**

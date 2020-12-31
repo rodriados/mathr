@@ -9,9 +9,12 @@
 namespace Mathr\Evaluator\Node;
 
 use Mathr\Interperter\Token;
+use Mathr\Evaluator\Assigner;
 use Mathr\Contracts\Evaluator\NodeInterface;
 use Mathr\Contracts\Evaluator\NodeException;
 use Mathr\Contracts\Evaluator\MemoryInterface;
+use Mathr\Contracts\Evaluator\MemoryException;
+use Mathr\Contracts\Evaluator\AssignerException;
 use Mathr\Contracts\Evaluator\EvaluationException;
 
 /**
@@ -36,14 +39,28 @@ class OperatorNode extends HierarchyNode
     ];
 
     /**
+     * The list of operator functions.
+     * @var callable[] The functions to use when evaluating each operator.
+     */
+    private static array $functors = [];
+
+    /**
      * Evaluates the node and produces a result.
      * @param MemoryInterface $memory The memory to lookup for bindings.
      * @return NodeInterface The produced resulting node.
      * @throws NodeException The produced result is invalid.
-     * @throws EvaluationException The operator does is invalid.
+     * @throws EvaluationException The operator is invalid.
+     * @throws AssignerException An invalid binding was given.
+     * @throws MemoryException The memory stack was overflown while evaluating contents.
      */
     public function evaluate(MemoryInterface $memory): NodeInterface
     {
+        if (empty(self::$functors))
+            self::$functors = self::loadOperatorFunctions();
+
+        if ($this->getData() == Token::OP_EQL)
+            return Assigner::assignToMemory($memory, ...$this->getHierarchy());
+
         $hierarchy = $this->evaluateHierarchy($memory);
 
         return self::allOfNumbers($hierarchy)
@@ -79,22 +96,25 @@ class OperatorNode extends HierarchyNode
      * @param NodeInterface[] $params The operands to apply the operator to.
      * @return NodeInterface The produced resulting node.
      * @throws NodeException The produced result is invalid.
-     * @throws EvaluationException The operator does is invalid.
+     * @throws EvaluationException The operator is invalid.
      */
     private function evaluateOperator(array $params): NodeInterface
     {
-        // TODO: Use bcmath and fallback to closures if not available.
-        // TODO: Implement assignment operator.
-        $result = match ($this->getData()) {
-            Token::OP_SUM => floatval((string)$params[0]) + floatval((string)$params[1]),
-            Token::OP_SUB => floatval((string)$params[0]) - floatval((string)$params[1]),
-            Token::OP_MUL => floatval((string)$params[0]) * floatval((string)$params[1]),
-            Token::OP_DIV => floatval((string)$params[0]) / floatval((string)$params[1]),
-            Token::OP_PWR => pow(floatval((string)$params[0]), floatval((string)$params[1])),
-            default       => throw new EvaluationException("Invalid operator")
-        };
+        $params = array_map(fn (NodeInterface $node) => $node->getData(), $params);
+        $result = $this->getFunctor() (...$params);
 
         return NumberNode::make($result);
+    }
+
+    /**
+     * Retrieves the functor bound the operator.
+     * @return callable The functor bound to the current operator.
+     * @throws EvaluationException The operator is invalid.
+     */
+    private function getFunctor(): callable
+    {
+        return self::$functors[$this->getData()]
+            ?? throw EvaluationException::operatorIsInvalid($this);
     }
 
     /**
@@ -130,5 +150,50 @@ class OperatorNode extends HierarchyNode
         return self::PRECEDENCE[$op->getData()] <= self::PRECEDENCE[$this->getData()]
             ? sprintf('(%s)', $op->strRepr())
             : $op->strRepr();
+    }
+
+    /**
+     * Loads the functions to use when evaluating operators.
+     * @return callable[] The list of operator functions.
+     */
+    private static function loadOperatorFunctions(): array
+    {
+        return !extension_loaded('bcmath')
+            ? self::loadBuiltinOperators()
+            : self::loadBCMathOperators();
+    }
+
+    /**
+     * Loads built-in functions to use when evaluating operators.
+     * @return callable[] The list of operator functions.
+     */
+    private static function loadBuiltinOperators(): array
+    {
+        return [
+            Token::OP_SUM => fn ($x, $y) => $x + $y,
+            Token::OP_SUB => fn ($x, $y) => $x - $y,
+            Token::OP_MUL => fn ($x, $y) => $x * $y,
+            Token::OP_DIV => fn ($x, $y) => $x / $y,
+            Token::OP_PWR => fn ($x, $y) => $x ** $y,
+            Token::OP_POS => fn ($x) => +$x,
+            Token::OP_NEG => fn ($x) => -$x,
+        ];
+    }
+
+    /**
+     * Loads the BCMath extension functions to use when evaluating operators.
+     * @return callable[] The list of operator functions.
+     */
+    private static function loadBCMathOperators(): array
+    {
+        return [
+            Token::OP_SUM => 'bcadd',
+            Token::OP_SUB => 'bcsub',
+            Token::OP_MUL => 'bcmul',
+            Token::OP_DIV => 'bcdiv',
+            Token::OP_PWR => 'bcpow',
+            Token::OP_POS => fn ($x) => $x,
+            Token::OP_NEG => fn ($x) => bcmul($x, '-1'),
+        ];
     }
 }
