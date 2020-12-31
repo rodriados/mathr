@@ -33,6 +33,20 @@ class NumberNode extends Node
     }
 
     /**
+     * Represents the node as a string.
+     * @return string The node's string representation.
+     */
+    public function strRepr(): string
+    {
+        static $regex = '/^([-+])?0*([1-9][0-9]*|0)(?:(\.[0-9]*[1-9])|\.)0*$/';
+
+        if (preg_match($regex, $this->getData(), $match))
+            return join(array_slice($match, 1));
+
+        return $this->getData();
+    }
+
+    /**
      * Creates a new node from a numeric value.
      * @param int|float|string $value The value to create the node with.
      * @return static The created node.

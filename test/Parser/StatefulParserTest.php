@@ -231,7 +231,7 @@ final class StatefulParserTest extends TestCase
      * Provides invalid expressions for testing.
      * @return string[][] The invalid expressions.
      */
-    public function provideInvalidExpressions(): array
+    public static function provideInvalidExpressions(): array
     {
         return [
             [ '2 +' ],
@@ -249,7 +249,7 @@ final class StatefulParserTest extends TestCase
      * Provides mismatched expressions for testing.
      * @return string[][] The mismatched expresions.
      */
-    public function provideMismatchedExpressions(): array
+    public static function provideMismatchedExpressions(): array
     {
         return [
             [ '(((((1))))' ],

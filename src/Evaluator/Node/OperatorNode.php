@@ -175,8 +175,8 @@ class OperatorNode extends HierarchyNode
             Token::OP_MUL => fn ($x, $y) => $x * $y,
             Token::OP_DIV => fn ($x, $y) => $x / $y,
             Token::OP_PWR => fn ($x, $y) => $x ** $y,
-            Token::OP_POS => fn ($x) => +$x,
             Token::OP_NEG => fn ($x) => -$x,
+            Token::OP_POS => fn ($x) => +$x,
         ];
     }
 
@@ -187,13 +187,13 @@ class OperatorNode extends HierarchyNode
     private static function loadBCMathOperators(): array
     {
         return [
-            Token::OP_SUM => 'bcadd',
-            Token::OP_SUB => 'bcsub',
-            Token::OP_MUL => 'bcmul',
-            Token::OP_DIV => 'bcdiv',
-            Token::OP_PWR => 'bcpow',
+            Token::OP_SUM => fn ($x, $y) => bcadd($x, $y, 15),
+            Token::OP_SUB => fn ($x, $y) => bcsub($x, $y, 15),
+            Token::OP_MUL => fn ($x, $y) => bcmul($x, $y, 15),
+            Token::OP_DIV => fn ($x, $y) => bcdiv($x, $y, 15),
+            Token::OP_PWR => fn ($x, $y) => pow($x, $y),
+            Token::OP_NEG => fn ($x) => bcmul($x, '-1', 15),
             Token::OP_POS => fn ($x) => $x,
-            Token::OP_NEG => fn ($x) => bcmul($x, '-1'),
         ];
     }
 }

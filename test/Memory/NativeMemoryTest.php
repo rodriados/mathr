@@ -106,7 +106,7 @@ final class NativeMemoryTest extends TestCase
      * Provides native constants and their expected values.
      * @return array[] The list of native constants.
      */
-    public function provideNativeConstants(): array
+    public static function provideNativeConstants(): array
     {
         return [
             [ 'e',                 M_E, ],
@@ -124,7 +124,7 @@ final class NativeMemoryTest extends TestCase
      * Provides native functions and their expected values.
      * @return array[] The list of native functions.
      */
-    public function provideNativeFunctions(): array
+    public static function provideNativeFunctions(): array
     {
         return [
             [ 'abs',     [      -39 ],     'abs' ],
