@@ -39,12 +39,12 @@ class BracketsNode extends HierarchyNode
         $hierarchy = $this->evaluateHierarchy($memory);
         $vector    = array_shift($hierarchy);
 
-        if (!$vector instanceof VectorNode && !$vector instanceof FunctionNode)
+        if ($vector instanceof NumberNode)
             throw EvaluationException::cannotApplyBrackets($vector);
 
-        return self::allOfNumbers($hierarchy)
+        return $vector instanceof VectorNode && self::allOfNumbers($hierarchy)
             ? $this->evaluateLookup($vector, $hierarchy)
-            : static::make($hierarchy);
+            : static::make([$vector, ...$hierarchy]);
     }
 
     /**

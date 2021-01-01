@@ -183,8 +183,9 @@ final class MathrTest extends TestCase
     }
 
     /**
-     * @param array $decls
-     * @param array $tests
+     * Tests whether functions can be stored and retrieved from memory.
+     * @param string[] $decls The list of functions declarations.
+     * @param string[] $tests The list of tests for each function.
      * @dataProvider provideCustomFunctions
      * @since 3.0
      */
@@ -213,7 +214,7 @@ final class MathrTest extends TestCase
                 [
                     'fib(0) = 0',
                     'fib(1) = 1',
-                    'fib(n) = fib(n - 1) + fib(n - 2)'
+                    'fib(n) = fib(n - 1) + fib(n - 2)',
                 ],
                 [
                     'fib(0)'  =>  '0',
@@ -223,12 +224,30 @@ final class MathrTest extends TestCase
             ],
             [
                 [
-                    'fib(x) = ceil((φ ^ x - (1 - φ) ^ x) / sqrt(5))'
+                    'fib(n) = fib(n - 1) + fib(n - 2)',
+                    'fib(x) = ceil((φ ^ x - (1 - φ) ^ x) / sqrt(5))',
                 ],
                 [
                     'fib(0)'  =>  '0',
                     'fib(1)'  =>  '1',
                     'fib(10)' => '55',
+                ]
+            ],
+            [
+                [
+                    '_mulDiag11(x) = x[1,1] * x[2,2] * x[3,3]',
+                    '_mulDiag12(x) = x[2,1] * x[3,2] * x[1,3]',
+                    '_mulDiag13(x) = x[3,1] * x[1,2] * x[2,3]',
+                    '_mulDiag21(x) = x[1,1] * x[2,3] * x[3,2]',
+                    '_mulDiag22(x) = x[2,1] * x[3,3] * x[1,2]',
+                    '_mulDiag23(x) = x[3,1] * x[1,3] * x[2,2]',
+                    '_sumDiag1(x) = _mulDiag11(x) + _mulDiag12(x) + _mulDiag13(x)',
+                    '_sumDiag2(x) = _mulDiag21(x) + _mulDiag22(x) + _mulDiag23(x)',
+                    'det3(x) = _sumDiag1(x) - _sumDiag2(x)',
+                ],
+                [
+                    'det3({{1,0,0},{0,1,0},{0,0,1}})' => '1',
+                    'det3({{1,2,3},{2,5,6},{2,5,8}})' => '2',
                 ]
             ]
         ];

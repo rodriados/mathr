@@ -25,7 +25,7 @@ class RegexTokenizer extends Tokenizer
      */
     private const TOKEN_PATTERNS = [
         'number'     => '(?:[0-9]*\.[0-9]+|[0-9]+\.?)(?:e[+-]?[0-9]+)?',
-        'identifier' => '(?:\p{L}[\p{L}0-9_]*)',
+        'identifier' => '(?:[\p{L}_][\p{L}0-9_]*)',
         'op_right'   => '(?:[-+/*])',
         'op_left'    => '(?:[=^])',
         'paren'      => '(?:[()])',
