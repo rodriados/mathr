@@ -17,18 +17,6 @@ use Mathr\Contracts\MathrException;
 class EvaluationException extends MathrException
 {
     /**
-     * A brackets operator used in an invalid expression.
-     * @param NodeInterface $node The invalid expression for brackets.
-     * @return static The exception to be thrown.
-     */
-    public static function cannotApplyBrackets(NodeInterface $node): static
-    {
-        return new static(
-            sprintf("Brackets operator cannot be applied to expression '%s'", $node->strRepr())
-        );
-    }
-
-    /**
      * The function was not found in memory.
      * @param NodeInterface $node The unknown function's node.
      * @return static The exception to be thrown.

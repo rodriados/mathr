@@ -143,8 +143,6 @@ class StatefulParser extends Parser
             Token::OPERATOR    => self::consumeOperator($state, $token),
             Token::FUNCTION    => self::consumeParenthesis($state, $token),
             Token::PARENTHESIS => self::consumeParenthesis($state, $token),
-            Token::BRACKETS    => self::consumeBrackets($state, $token),
-            Token::CURLYBRACES => self::consumeCurlyBraces($state, $token),
             Token::COMMA       => self::consumeComma($state, $token),
             Token::EOS         => self::consumeEOS($state, $token),
             default            => throw ParserException::tokenIsUnexpected($token),
@@ -247,37 +245,6 @@ class StatefulParser extends Parser
     }
 
     /**
-     * Consumes a brackets token.
-     * @param object $state The current parsing state.
-     * @param TokenInterface $token The token to be consumed.
-     * @return object The updated parsing state after the consumed token.
-     * @throws ParserException An unexpected or mismatched token when parsing.
-     */
-    private static function consumeBrackets(object $state, TokenInterface $token): object
-    {
-        if (!$state->expectOperator)
-            throw ParserException::tokenIsUnexpected($token);
-
-        return $token->isOf(Token::OPEN)
-            ? self::consumePairOpen($state, $token)
-            : self::consumePairClose($state, $token);
-    }
-
-    /**
-     * Consumes a curly-braces token.
-     * @param object $state The current parsing state.
-     * @param TokenInterface $token The token to be consumed.
-     * @return object The updated parsing state after the consumed token.
-     * @throws ParserException An unexpected or mismatched token when parsing.
-     */
-    private static function consumeCurlyBraces(object $state, TokenInterface $token): object
-    {
-        return $token->isOf(Token::OPEN)
-            ? self::consumePairOpen($state, $token)
-            : self::consumePairClose($state, $token);
-    }
-
-    /**
      * Consumes an opening pair token.
      * @param object $state The current parsing state.
      * @param TokenInterface $token The token to be consumed.
@@ -321,7 +288,7 @@ class StatefulParser extends Parser
         if (!$last[0]->isOf($type | Token::OPEN))
             throw ParserException::tokenIsMismatched($token);
 
-        if ($last[0]->getType(Token::VALUED | Token::BRACKETS))
+        if ($last[0]->getType(Token::VALUED))
             $state->expression->push(...$last);
 
         return $state;
@@ -379,7 +346,7 @@ class StatefulParser extends Parser
     private static function functionIncrement(object $state): object
     {
         if (!$state->stack->isEmpty()) {
-            if ($state->stack->top()[0]->getType(Token::IDENTIFIER | Token::BRACKETS | Token::CURLYBRACES)) {
+            if ($state->stack->top()[0]->isOf(Token::FUNCTION)) {
                 [$function, $count] = $state->stack->pop();
                 $state->stack->push([$function, ++$count]);
             }

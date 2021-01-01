@@ -29,8 +29,6 @@ class RegexTokenizer extends Tokenizer
         'op_right'   => '(?:[-+/*])',
         'op_left'    => '(?:[=^])',
         'paren'      => '(?:[()])',
-        'bracket'    => '(?:[\[\]])',
-        'curly'      => '(?:[{}])',
         'comma'      => '(?:,)',
         'unknown'    => '(?:[^\s])',
     ];
@@ -109,8 +107,6 @@ class RegexTokenizer extends Tokenizer
             'op_right'   => new Token($data, $pos, type: Token::OPERATOR | Token::RIGHT),
             'op_left'    => new Token($data, $pos, type: Token::OPERATOR | Token::LEFT),
             'paren'      => new Token($data, $pos, type: Token::PARENTHESIS | self::getPairType($data)),
-            'bracket'    => new Token($data, $pos, type: Token::BRACKETS    | self::getPairType($data)),
-            'curly'      => new Token($data, $pos, type: Token::CURLYBRACES | self::getPairType($data)),
             'comma'      => new Token($data, $pos, type: Token::COMMA),
             default      => new Token($data, $pos, type: Token::UNKNOWN),
         };

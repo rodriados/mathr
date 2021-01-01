@@ -24,8 +24,6 @@ class Token implements TokenInterface
     public const IDENTIFIER  = 0x0002;
     public const OPERATOR    = 0x0004;
     public const PARENTHESIS = 0x0008;
-    public const BRACKETS    = 0x0010;
-    public const CURLYBRACES = 0x0020;
     public const COMMA       = 0x0040;
     public const EOS         = 0x0080;
     public const UNKNOWN     = 0x8000;
@@ -61,9 +59,9 @@ class Token implements TokenInterface
      * Token properties list.
      * These flags informs which tokens fall into the given property.
      */
-    public const ARGUMENTED  = self::IDENTIFIER | self::BRACKETS | self::CURLYBRACES;
-    public const PAIRED      = self::PARENTHESIS | self::BRACKETS | self::CURLYBRACES;
-    public const VALUED      = self::IDENTIFIER | self::NUMBER | self::CURLYBRACES;
+    public const ARGUMENTED  = self::IDENTIFIER;
+    public const PAIRED      = self::PARENTHESIS;
+    public const VALUED      = self::IDENTIFIER | self::NUMBER;
     /**#@-*/
 
     /**#@+

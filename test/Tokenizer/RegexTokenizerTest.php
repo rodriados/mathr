@@ -60,10 +60,6 @@ class RegexTokenizerTest extends TestCase
             '^' => Token::OPERATOR    | Token::LEFT,
             '(' => Token::PARENTHESIS | Token::OPEN,
             ')' => Token::PARENTHESIS | Token::CLOSE,
-            '[' => Token::BRACKETS    | Token::OPEN,
-            ']' => Token::BRACKETS    | Token::CLOSE,
-            '{' => Token::CURLYBRACES | Token::OPEN,
-            '}' => Token::CURLYBRACES | Token::CLOSE,
             ',' => Token::COMMA,
             '#' => Token::UNKNOWN
         ];

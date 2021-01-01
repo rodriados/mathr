@@ -78,11 +78,7 @@ abstract class HierarchyNode extends Node
      */
     final protected static function allOfNumbers(array $nodes): bool
     {
-        $lambda = fn (bool $carry, NodeInterface $node) => $carry && (
-            $node instanceof NumberNode ||
-            $node instanceof VectorNode && self::allOfNumbers($node->getHierarchy())
-        );
-
+        $lambda = fn (bool $carry, $node) => $carry && $node instanceof NumberNode;
         return array_reduce($nodes, $lambda, true);
     }
 }

@@ -151,6 +151,36 @@ final class MathrTest extends TestCase
     }
 
     /**
+     * Tests whether expressions with unbound variables can be evaluated.
+     * @param string $expression The expression to be tested.
+     * @param string $expected The expected test result.
+     * @dataProvider provideUnboundExpressions
+     * @since 3.0
+     */
+    public function testIfEvaluatesUnboundExpressions(string $expression, string $expected)
+    {
+        $evaluated = $this->mathr->evaluate($expression);
+
+        $this->assertInstanceOf(NodeInterface::class, $evaluated);
+        $this->assertEquals($expected, (string) $evaluated);
+        $this->assertEquals($expected, $evaluated->strRepr());
+    }
+
+    /**
+     * Provides expressions with unbound variables.
+     * @return string[][] The list of expressions.
+     */
+    public static function provideUnboundExpressions(): array
+    {
+        return [
+            [ 'x + y + z',       '(x + y) + z' ],
+            [ 'f(x, y+1)',       'f(x, y + 1)' ],
+            [ '3f(x)g(y)', '(3 * f(x)) * g(y)' ],
+            [ 'x + 3 * 2',             'x + 6' ],
+        ];
+    }
+
+    /**
      * Tests whether constants can be stored and retrieved from memory.
      * @param string $name The name of the constant to be stored in memory.
      * @param string $contents The constant's contents to store in memory.
@@ -225,7 +255,7 @@ final class MathrTest extends TestCase
             [
                 [
                     'fib(n) = fib(n - 1) + fib(n - 2)',
-                    'fib(x) = ceil((φ ^ x - (1 - φ) ^ x) / sqrt(5))',
+                    'fib(n) = ceil((φ ^ n - (1 - φ) ^ n) / sqrt(5))',
                 ],
                 [
                     'fib(0)'  =>  '0',
@@ -233,23 +263,6 @@ final class MathrTest extends TestCase
                     'fib(10)' => '55',
                 ]
             ],
-            [
-                [
-                    '_mulDiag11(x) = x[1,1] * x[2,2] * x[3,3]',
-                    '_mulDiag12(x) = x[2,1] * x[3,2] * x[1,3]',
-                    '_mulDiag13(x) = x[3,1] * x[1,2] * x[2,3]',
-                    '_mulDiag21(x) = x[1,1] * x[2,3] * x[3,2]',
-                    '_mulDiag22(x) = x[2,1] * x[3,3] * x[1,2]',
-                    '_mulDiag23(x) = x[3,1] * x[1,3] * x[2,2]',
-                    '_sumDiag1(x) = _mulDiag11(x) + _mulDiag12(x) + _mulDiag13(x)',
-                    '_sumDiag2(x) = _mulDiag21(x) + _mulDiag22(x) + _mulDiag23(x)',
-                    'det3(x) = _sumDiag1(x) - _sumDiag2(x)',
-                ],
-                [
-                    'det3({{1,0,0},{0,1,0},{0,0,1}})' => '1',
-                    'det3({{1,2,3},{2,5,6},{2,5,8}})' => '2',
-                ]
-            ]
         ];
     }
 }

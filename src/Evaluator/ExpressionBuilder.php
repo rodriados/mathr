@@ -10,10 +10,8 @@ namespace Mathr\Evaluator;
 
 use Mathr\Interperter\Token;
 use Mathr\Evaluator\Node\NumberNode;
-use Mathr\Evaluator\Node\VectorNode;
 use Mathr\Evaluator\Node\OperatorNode;
 use Mathr\Evaluator\Node\FunctionNode;
-use Mathr\Evaluator\Node\BracketsNode;
 use Mathr\Evaluator\Node\IdentifierNode;
 use Mathr\Contracts\Evaluator\NodeInterface;
 use Mathr\Contracts\Interperter\TokenInterface;
@@ -55,8 +53,6 @@ class ExpressionBuilder implements ExpressionBuilderInterface
             Token::IDENTIFIER  => $this->pushIdentifier($token),
             Token::OPERATOR    => $this->pushOperator($token),
             Token::FUNCTION    => $this->pushFunction($token, $argc),
-            Token::BRACKETS    => $this->pushBrackets($token, $argc),
-            Token::CURLYBRACES => $this->pushVector($token, $argc),
             default            => throw ExpressionBuilderException::tokenIsInvalid($token),
         };
     }
@@ -106,32 +102,6 @@ class ExpressionBuilder implements ExpressionBuilderInterface
     private function pushFunction(TokenInterface $token, int $argc): int
     {
         $node = new FunctionNode($token, $this->requestNodes($argc));
-        return array_push($this->stack, $node);
-    }
-
-    /**
-     * Pushes a brackets node onto the node stack.
-     * @param TokenInterface $token The token to build the node from.
-     * @param int $argc The number of tokens passed as function arguments.
-     * @return int The number of nodes currently on the stack.
-     * @throws ExpressionBuilderException Not enough arguments for operator on stack.
-     */
-    private function pushBrackets(TokenInterface $token, int $argc): int
-    {
-        $node = new BracketsNode($token, $this->requestNodes($argc + 1));
-        return array_push($this->stack, $node);
-    }
-
-    /**
-     * Pushes a vector node onto the node stack.
-     * @param TokenInterface $token The token to build the node from.
-     * @param int $argc The number of tokens passed as function arguments.
-     * @return int The number of nodes currently on the stack.
-     * @throws ExpressionBuilderException Not enough arguments for operator on stack.
-     */
-    private function pushVector(TokenInterface $token, int $argc): int
-    {
-        $node = new VectorNode($token, $this->requestNodes($argc));
         return array_push($this->stack, $node);
     }
 
