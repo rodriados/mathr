@@ -199,35 +199,6 @@ final class StatefulParserTest extends TestCase
     }
 
     /**
-     * Tests whether mismatched pair nodes can be detected.
-     * @param string $expression The mismatched expression.
-     * @dataProvider provideMismatchedExpressions
-     * @since 3.0
-     */
-    public function testIfDetectsMismatches(string $expression)
-    {
-        $this->expectException(ParserException::class);
-        $this->expectExceptionMessageMatches("/^Mismatched token '.' at position \d$/");
-        $this->parser->runParser($expression);
-    }
-
-    /**
-     * Asserts whether the parsed tokens correspond to the expected.
-     * @param TokenInterface[] $expected The list of expected tokens.
-     * @param TokenInterface[] $tokens The list of obtained tokens.
-     */
-    private function assertExpectedTokens(array $expected, array $tokens): void
-    {
-        $this->assertSameSize($expected, $tokens);
-
-        foreach ($tokens as $pos => $token) {
-            $this->assertEquals($expected[$pos]->getData(), $token->getData());
-            $this->assertEquals($expected[$pos]->getType(), $token->getType());
-            $this->assertEquals($expected[$pos]->getPosition(), $token->getPosition());
-        }
-    }
-
-    /**
      * Provides invalid expressions for testing.
      * @return string[][] The invalid expressions.
      */
@@ -246,6 +217,19 @@ final class StatefulParserTest extends TestCase
     }
 
     /**
+     * Tests whether mismatched pair nodes can be detected.
+     * @param string $expression The mismatched expression.
+     * @dataProvider provideMismatchedExpressions
+     * @since 3.0
+     */
+    public function testIfDetectsMismatches(string $expression)
+    {
+        $this->expectException(ParserException::class);
+        $this->expectExceptionMessageMatches("/^Mismatched token '.' at position \d$/");
+        $this->parser->runParser($expression);
+    }
+
+    /**
      * Provides mismatched expressions for testing.
      * @return string[][] The mismatched expresions.
      */
@@ -257,5 +241,21 @@ final class StatefulParserTest extends TestCase
             [ '{1,2,3}[1'  ],
             [ '((1 + 2)))' ],
         ];
+    }
+
+    /**
+     * Asserts whether the parsed tokens correspond to the expected.
+     * @param TokenInterface[] $expected The list of expected tokens.
+     * @param TokenInterface[] $tokens The list of obtained tokens.
+     */
+    private function assertExpectedTokens(array $expected, array $tokens): void
+    {
+        $this->assertSameSize($expected, $tokens);
+
+        foreach ($tokens as $pos => $token) {
+            $this->assertEquals($expected[$pos]->getData(), $token->getData());
+            $this->assertEquals($expected[$pos]->getType(), $token->getType());
+            $this->assertEquals($expected[$pos]->getPosition(), $token->getPosition());
+        }
     }
 }

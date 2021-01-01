@@ -59,22 +59,6 @@ final class MathrTest extends TestCase
     }
 
     /**
-     * Checks whether native constants can be evaluated.
-     * @param string $name The name of the constant to be retrieved.
-     * @param float $expected The expected constant value.
-     * @dataProvider provideNativeConstants
-     * @since 3.0
-     */
-    public function testIfEvaluatesNativeConstants(string $name, float $expected)
-    {
-        $evaluated = $this->mathr->evaluate($name);
-
-        $this->assertInstanceOf(NodeInterface::class, $evaluated);
-        $this->assertInstanceOf(NumberNode::class, $evaluated);
-        $this->assertEquals($expected, $evaluated->strRepr());
-    }
-
-    /**
      * Provides simple valid expressions for testing.
      * @return string[][] The expressions and their expected result.
      */
@@ -94,6 +78,22 @@ final class MathrTest extends TestCase
     }
 
     /**
+     * Tests whether native constants can be evaluated.
+     * @param string $name The name of the constant to be retrieved.
+     * @param float $expected The expected constant value.
+     * @dataProvider provideNativeConstants
+     * @since 3.0
+     */
+    public function testIfEvaluatesNativeConstants(string $name, float $expected)
+    {
+        $evaluated = $this->mathr->evaluate($name);
+
+        $this->assertInstanceOf(NodeInterface::class, $evaluated);
+        $this->assertInstanceOf(NumberNode::class, $evaluated);
+        $this->assertEquals($expected, $evaluated->strRepr());
+    }
+
+    /**
      * Provides native constants and their expected values.
      * @return array[] The list of native constants.
      */
@@ -108,6 +108,129 @@ final class MathrTest extends TestCase
             [ 'φ',   1.618033988749894, ],
             [ 'psi', 3.359885666243177, ],
             [ 'ψ',   3.359885666243177, ],
+        ];
+    }
+
+    /**
+     * Tests whether function expressions can be evaluated.
+     * @param string $expression The expression to be tested.
+     * @param string $expected The expected test result.
+     * @dataProvider provideFunctionExpressions
+     * @since 3.0
+     */
+    public function testIfEvaluatesFunctionExpressions(string $expression, string $expected)
+    {
+        $evaluated = $this->mathr->evaluate($expression);
+
+        $this->assertInstanceOf(NodeInterface::class, $evaluated);
+        $this->assertInstanceOf(NumberNode::class, $evaluated);
+        $this->assertEquals($expected, $evaluated->strRepr());
+    }
+
+    /**
+     * Provides expressions with native functions and their expected values.
+     * @return array[] The list of expressions.
+     */
+    public static function provideFunctionExpressions(): array
+    {
+        return [
+            [     'ln(e)',   '1' ],
+            [    'cos(0)',   '1' ],
+            [  'cos(π/2)',   '0' ],
+            [    'cos(π)',  '-1' ],
+            [ 'cos(3π/2)',   '0' ],
+            [   'cos(2π)',   '1' ],
+            [    'sin(0)',   '0' ],
+            [  'sin(π/2)',   '1' ],
+            [    'sin(π)',   '0' ],
+            [ 'sin(3π/2)',  '-1' ],
+            [   'sin(2π)',   '0' ],
+            [    'tan(0)',   '0' ],
+            [  'tan(π/4)',   '1' ],
+        ];
+    }
+
+    /**
+     * Tests whether constants can be stored and retrieved from memory.
+     * @param string $name The name of the constant to be stored in memory.
+     * @param string $contents The constant's contents to store in memory.
+     * @param mixed $expected The expected constant's value in memory.
+     * @dataProvider provideCustomConstants
+     * @since 3.0
+     */
+    public function testIfCanStoreConstants(string $name, string $contents, mixed $expected)
+    {
+        $this->mathr->evaluate("{$name} = {$contents}");
+        $evaluated = $this->mathr->evaluate($name);
+
+        $this->assertInstanceOf(NodeInterface::class, $evaluated);
+        $this->assertInstanceOf(NumberNode::class, $evaluated);
+        $this->assertEquals($expected, $evaluated->strRepr());
+    }
+
+    /**
+     * Provides constants to be stored in memory and their expected values.
+     * @return array[] The list of constants.
+     */
+    public static function provideCustomConstants(): array
+    {
+        return [
+            [ 'a',    '10', '10' ],
+            [ 'b', '2 + 4',  '6' ],
+            [ 'c', 'ln(e)',  '1' ],
+            [ 'd',     'e',  M_E ],
+        ];
+    }
+
+    /**
+     * @param array $decls
+     * @param array $tests
+     * @dataProvider provideCustomFunctions
+     * @since 3.0
+     */
+    public function testIfCanStoreFunctions(array $decls, array $tests)
+    {
+        foreach ($decls as $decl)
+            $this->mathr->evaluate($decl);
+
+        foreach ($tests as $expression => $expected) {
+            $evaluated = $this->mathr->evaluate($expression);
+
+            $this->assertInstanceOf(NodeInterface::class, $evaluated);
+            $this->assertInstanceOf(NumberNode::class, $evaluated);
+            $this->assertEquals($expected, $evaluated->strRepr());
+        }
+    }
+
+    /**
+     * Provides functions to be stored in memory and their expected bodies.
+     * @return array[] The list of functions.
+     */
+    public static function provideCustomFunctions(): array
+    {
+        return [
+            [
+                [
+                    'fib(0) = 0',
+                    'fib(1) = 1',
+                    'fib(n) = fib(n - 1) + fib(n - 2)'
+                ],
+                [
+                    'fib(0)'  =>  '0',
+                    'fib(1)'  =>  '1',
+                    'fib(10)' => '55',
+                ]
+            ],
+            [
+                [
+                    'fib(x) = ceil((φ ^ x - (1 - φ) ^ x) / sqrt(5))'
+                ],
+                [
+                    'fib(0)'  =>  '0',
+                    'fib(1)'  =>  '1',
+                    'fib(10)' => '55',
+                ]
+            ]
         ];
     }
 }

@@ -62,6 +62,24 @@ final class NativeMemoryTest extends TestCase
     }
 
     /**
+     * Provides native constants and their expected values.
+     * @return array[] The list of native constants.
+     */
+    public static function provideNativeConstants(): array
+    {
+        return [
+            [ 'e',                 M_E, ],
+            [ 'inf',               INF, ],
+            [ 'pi',               M_PI, ],
+            [ 'π',                M_PI, ],
+            [ 'phi', 1.618033988749894, ],
+            [ 'φ',   1.618033988749894, ],
+            [ 'psi', 3.359885666243177, ],
+            [ 'ψ',   3.359885666243177, ],
+        ];
+    }
+
+    /**
      * Checks whether the memory can get native functions.
      * @param string $name The name of the function to be retrieved.
      * @param array $args The list of arguments to execute the function with.
@@ -100,24 +118,6 @@ final class NativeMemoryTest extends TestCase
         $this->expectException(MemoryException::class);
         $this->expectExceptionMessage('An immutable memory cannot be changed');
         $this->memory->delete(IdentifierNode::make('pi'));
-    }
-
-    /**
-     * Provides native constants and their expected values.
-     * @return array[] The list of native constants.
-     */
-    public static function provideNativeConstants(): array
-    {
-        return [
-            [ 'e',                 M_E, ],
-            [ 'inf',               INF, ],
-            [ 'pi',               M_PI, ],
-            [ 'π',                M_PI, ],
-            [ 'phi', 1.618033988749894, ],
-            [ 'φ',   1.618033988749894, ],
-            [ 'psi', 3.359885666243177, ],
-            [ 'ψ',   3.359885666243177, ],
-        ];
     }
 
     /**

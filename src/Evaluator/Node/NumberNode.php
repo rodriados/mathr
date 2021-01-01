@@ -38,10 +38,10 @@ class NumberNode extends Node
      */
     public function strRepr(): string
     {
-        static $regex = '/^([-+])?0*([1-9][0-9]*|0)(?:(\.[0-9]*[1-9])|\.)0*$/';
+        static $regex = '/^([-+])?0*([1-9][0-9]*|0)(?:(?:(\.[0-9]*[1-9])|\.)0*)?$/';
 
         if (preg_match($regex, $this->getData(), $match))
-            return join(array_slice($match, 1));
+            return self::joinNumber(array_slice($match, 1));
 
         return $this->getData();
     }
@@ -57,5 +57,17 @@ class NumberNode extends Node
         return is_numeric($value)
             ? new static(new Token($value, type: Token::NUMBER))
             : throw NodeException::numericWasExpected($value);
+    }
+
+    /**
+     * Joins the number's parts together, taking care of possible negative zero.
+     * @param string[] $number The number's parts to be joined together.
+     * @return string The final joined number.
+     */
+    private static function joinNumber(array $number): string
+    {
+        return $number != [ '-', '0' ]
+            ? join($number)
+            : '0';
     }
 }

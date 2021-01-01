@@ -289,7 +289,7 @@ class StatefulParser extends Parser
         if ($state->expectOperator && $token->getType(Token::VALUED | Token::PARENTHESIS))
             $state = self::consumeImplicitOperator($state, $token);
 
-        if ($token->getType(Token::VALUED))
+        if ($token->getType(Token::VALUED | Token::PARENTHESIS))
             $state = self::functionIncrement($state);
 
         $state->stack->push([$token, 0]);
