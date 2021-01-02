@@ -56,7 +56,7 @@ final class StatefulParserTest extends TestCase
     {
         /** @var TokenListExpressionBuilderMock $expression */
         $expression = $this->parser->runParser($expression);
-        $tokenList = $expression->getTokens();
+        $tokenList = $expression->getRaw();
 
         $this->assertSameSize($expected, $tokenList);
 

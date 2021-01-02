@@ -8,10 +8,12 @@
  */
 
 use Mathr\Mathr;
+use Mathr\Contracts\MathrException;
 use Mathr\Evaluator\Node\NumberNode;
 use Mathr\Contracts\Evaluator\NodeInterface;
-use PHPUnit\Framework\TestCase;
 use Mathr\Contracts\Evaluator\AssignerException;
+use Mathr\Contracts\Evaluator\EvaluationException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * The project's complete integration test class.
@@ -264,6 +266,89 @@ final class MathrTest extends TestCase
                     'fib(10)' => '55',
                 ]
             ],
+        ];
+    }
+
+    /**
+     * Tests whether assignments can be created manually.
+     * @param array[] $decls The assignment declarations.
+     * @param array[] $tests The assingments' test cases.
+     * @dataProvider provideManualAssignments
+     * @since 3.0
+     */
+    public function testIfCanManuallyCreateAssignments(array $decls, array $tests)
+    {
+        foreach ($decls as [ $binding, $value ])
+            $this->mathr->set($binding, $value);
+
+        foreach ($tests as [ $test, $expected ]) {
+            $evaluated = $this->mathr->evaluate($test);
+            $this->assertInstanceOf(NodeInterface::class, $evaluated);
+            $this->assertEquals($expected, $evaluated->strRepr());
+        }
+    }
+
+    /**
+     * Tests whether bindings can be manually deleted from memory.
+     * @param array[] $decls The assignment declarations.
+     * @param array[] $tests The assingments' test cases.
+     * @dataProvider provideManualAssignments
+     * @since 3.0
+     */
+    public function testIfCanManuallyRemoveAssignments(array $decls, array $tests)
+    {
+        foreach ($decls as [ $binding, $value ])
+            $this->mathr->set($binding, $value);
+
+        foreach ($decls as [ $binding, $_ ])
+            $this->mathr->delete($binding);
+
+        foreach ($tests as [ $test, $_ ]) {
+            try {
+                $this->mathr->evaluate($test);
+            } catch (MathrException $exception) {
+                $regex = "/^Could not find function '[a-z]+' with the given parameters$/";
+                $this->assertInstanceOf(EvaluationException::class, $exception);
+                $this->assertMatchesRegularExpression($regex, $exception->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Provides manual assignments for testing.
+     * @return array[] The list of manual assignments.
+     */
+    public static function provideManualAssignments(): array
+    {
+        return [
+            [
+                [
+                    [       'x', 5                      ],
+                    [       'y', 7                      ],
+                    [    'f(x)', fn ($x) => $x * 2 + 1  ],
+                    [ 'g(x, y)', fn ($x, $y) => $x + $y ],
+                ],
+                [
+                    [      'f(10)', 21 ],
+                    [    'g(x, y)', 12 ],
+                    [    'g(7, 9)', 16 ],
+                    [ 'f(g(x, y))', 25 ],
+                    [ 'f(g(8, 9))', 35 ],
+                ]
+            ],
+            [
+                [
+                    [ 'fib(0)', 0                         ],
+                    [ 'fib(1)', 1                         ],
+                    [ 'fib(x)', 'fib(x - 1) + fib(x - 2)' ],
+                    [ 'inc(x)', fn ($x) => $x + 1         ],
+                ],
+                [
+                    [      'fib(10)', 55 ],
+                    [ 'inc(fib(10))', 56 ],
+                    [ 'fib(inc(10))', 89 ],
+                ]
+            ]
         ];
     }
 

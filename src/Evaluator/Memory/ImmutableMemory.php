@@ -24,7 +24,7 @@ trait ImmutableMemory
      * @param NodeInterface|NodeInterface[] $contents The target node's contents.
      * @throws MemoryException A native memory is immutable.
      */
-    public function put(StorableNodeInterface $node, NodeInterface|array $contents): void
+    public function put(StorableNodeInterface $node, mixed $contents): void
     {
         throw MemoryException::memoryIsImmutable();
     }

@@ -23,6 +23,12 @@ interface ExpressionBuilderInterface
     public function getExpression(): ExpressionInterface;
 
     /**
+     * Retrieves the internal expression, in an un-ready state.
+     * @return mixed The raw internal expression representation.
+     */
+    public function getRaw(): mixed;
+
+    /**
      * Pushes a token into the expression builder.
      * @param TokenInterface $token The token to be pushed into the expression.
      * @param int|null $argc The number of arguments the token must take.

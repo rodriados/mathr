@@ -37,7 +37,16 @@ class ExpressionBuilder implements ExpressionBuilderInterface
      */
     public function getExpression(): ExpressionInterface
     {
-        return new Expression($this->stack[0]);
+        return new Expression($this->getRaw());
+    }
+
+    /**
+     * Retrieves the internal expression, in an un-ready state.
+     * @return NodeInterface The raw internal expression node.
+     */
+    public function getRaw(): NodeInterface
+    {
+        return $this->stack[0];
     }
 
     /**

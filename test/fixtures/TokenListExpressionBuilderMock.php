@@ -33,10 +33,10 @@ class TokenListExpressionBuilderMock implements ExpressionBuilderInterface
     }
 
     /**
-     * Gets the list of all tokens pushed into the expression.
-     * @return TokenInterface[] The list of pushed tokens.
+     * Retrieves the internal expression, in an un-ready state.
+     * @return mixed The raw internal expression representation.
      */
-    public function getTokens(): array
+    public function getRaw(): mixed
     {
         return $this->list;
     }

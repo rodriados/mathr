@@ -28,7 +28,7 @@ class Assigner
      * Assings the contents to the binding on the given memory instance.
      * @param MemoryInterface $memory The memory in which the assignment must occur.
      * @param NodeInterface $binding The binding to the given content.
-     * @param NodeInterface $contents The content to be bound.
+     * @param mixed $contents The content to be bound.
      * @return StorableNodeInterface The given assignment binding.
      * @throws AssignerException An invalid binding was given.
      * @throws MemoryException The memory stack was overflown while evaluating contents.
@@ -36,15 +36,16 @@ class Assigner
     public static function assignToMemory(
         MemoryInterface $memory,
         NodeInterface $binding,
-        NodeInterface $contents
+        mixed $contents
     ): StorableNodeInterface
     {
         if (!$binding instanceof StorableNodeInterface)
             throw AssignerException::assignmentIsInvalid($binding);
 
-        $contents = $binding instanceof HierarchyNode
-            ? self::prepareBinding($memory, $binding, $contents)
-            : $contents->evaluate($memory);
+        if ($contents instanceof NodeInterface)
+            $contents = $binding instanceof HierarchyNode
+                ? self::prepareBinding($memory, $binding, $contents)
+                : $contents->evaluate($memory);
 
         $memory->put($binding, $contents);
         return $binding;

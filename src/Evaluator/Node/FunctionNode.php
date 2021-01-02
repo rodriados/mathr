@@ -102,7 +102,7 @@ class FunctionNode extends HierarchyNode implements StorableNodeInterface
     {
         $binding = $memory->get($this) ?: [];
 
-        if (is_array($binding))
+        if (is_array($binding) && !is_callable($binding))
             $binding = $this->pickBinding($binding, $params);
 
         if (!$binding instanceof NodeInterface)

@@ -24,9 +24,9 @@ interface MemoryInterface
     /**
      * Puts the contents of a function or variable into memory.
      * @param StorableNodeInterface $node The node to put the contents of.
-     * @param NodeInterface|NodeInterface[] $contents The target node's contents.
+     * @param mixed $contents The target node's contents.
      */
-    public function put(StorableNodeInterface $node, NodeInterface|array $contents): void;
+    public function put(StorableNodeInterface $node, mixed $contents): void;
 
     /**
      * Removes a function or variable from the memory.
