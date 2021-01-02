@@ -9,7 +9,6 @@
 
 use Mathr\Interperter\Token;
 use Mathr\Interperter\Parser\StatefulParser;
-use Mathr\Contracts\Interperter\TokenInterface;
 use Mathr\Contracts\Interperter\ParserException;
 use Mathr\Contracts\Interperter\ParserInterface;
 use Mathr\Interperter\Tokenizer\DefaultTokenizer;
@@ -47,97 +46,100 @@ final class StatefulParserTest extends TestCase
     }
 
     /**
-     * Tests whether a simple expression can be parsed.
+     * Tests whether a expressions can be parsed.
+     * @param string $expression The expression to be parsed.
+     * @param array $expected The expected parsed tokens.
+     * @dataProvider provideExpressions
      * @since 3.0
      */
-    public function testIfParsesSimpleExpression()
+    public function testIfParsesExpressions(string $expression, array $expected)
     {
-        $testCase = "x + 3(2x + 4y)^2";
-
-        $expected = [
-            new Token('x',  0, Token::IDENTIFIER              ),
-            new Token('3',  4, Token::NUMBER                  ),
-            new Token('2',  6, Token::NUMBER                  ),
-            new Token('x',  7, Token::IDENTIFIER              ),
-            new Token('*',  7, Token::OPERATOR | Token::RIGHT ),
-            new Token('4', 11, Token::NUMBER                  ),
-            new Token('y', 12, Token::IDENTIFIER              ),
-            new Token('*', 12, Token::OPERATOR | Token::RIGHT ),
-            new Token('+',  9, Token::OPERATOR | Token::RIGHT ),
-            new Token('2', 15, Token::NUMBER                  ),
-            new Token('^', 14, Token::OPERATOR | Token::LEFT  ),
-            new Token('*',  5, Token::OPERATOR | Token::RIGHT ),
-            new Token('+',  2, Token::OPERATOR | Token::RIGHT ),
-        ];
-
         /** @var TokenListExpressionBuilderMock $expression */
-        $expression = $this->parser->runParser($testCase);
+        $expression = $this->parser->runParser($expression);
         $tokenList = $expression->getTokens();
 
-        $this->assertExpectedTokens($expected, $tokenList);
+        $this->assertSameSize($expected, $tokenList);
+
+        foreach ($tokenList as $pos => $token) {
+            $this->assertEquals($expected[$pos]->getData(), $token->getData());
+            $this->assertEquals($expected[$pos]->getType(), $token->getType());
+            $this->assertEquals($expected[$pos]->getPosition(), $token->getPosition());
+        }
     }
 
     /**
-     * Tests whether functions are correctly parsed.
-     * @since 3.0
+     * Provides expressions to be parsed and tested with.
+     * @return array[] The list of expressions.
      */
-    public function testIfParsesFunctionExpression()
+    public static function provideExpressions(): array
     {
-        $testCase = "f(x, y) = g(x + y) + -(h(x - 1)^2 - i(-x, +y))";
-
-        $expected = [
-            new Token( 'x',  2, Token::IDENTIFIER              ),
-            new Token( 'y',  5, Token::IDENTIFIER              ),
-            new Token('f(',  0, Token::FUNCTION | Token::OPEN  ),
-            new Token( 'x', 12, Token::IDENTIFIER              ),
-            new Token( 'y', 16, Token::IDENTIFIER              ),
-            new Token( '+', 14, Token::OPERATOR | Token::RIGHT ),
-            new Token('g(', 10, Token::FUNCTION | Token::OPEN  ),
-            new Token( 'x', 25, Token::IDENTIFIER              ),
-            new Token( '1', 29, Token::NUMBER                  ),
-            new Token( '-', 27, Token::OPERATOR | Token::RIGHT ),
-            new Token('h(', 23, Token::FUNCTION | Token::OPEN  ),
-            new Token( '2', 32, Token::NUMBER                  ),
-            new Token( '^', 31, Token::OPERATOR | Token::LEFT  ),
-            new Token( 'x', 39, Token::IDENTIFIER              ),
-            new Token('-#', 38, Token::OPERATOR | Token::UNARY ),
-            new Token( 'y', 43, Token::IDENTIFIER              ),
-            new Token('+#', 42, Token::OPERATOR | Token::UNARY ),
-            new Token('i(', 36, Token::FUNCTION | Token::OPEN  ),
-            new Token( '-', 34, Token::OPERATOR | Token::RIGHT ),
-            new Token('-#', 21, Token::OPERATOR | Token::UNARY ),
-            new Token( '+', 19, Token::OPERATOR | Token::RIGHT ),
-            new Token( '=',  8, Token::OPERATOR | Token::LEFT  ),
+        return [
+            [
+                'x + 3(2x + 4y)^2',
+                [
+                    new Token('x',  0, Token::IDENTIFIER              ),
+                    new Token('3',  4, Token::NUMBER                  ),
+                    new Token('2',  6, Token::NUMBER                  ),
+                    new Token('x',  7, Token::IDENTIFIER              ),
+                    new Token('*',  7, Token::OPERATOR | Token::RIGHT ),
+                    new Token('4', 11, Token::NUMBER                  ),
+                    new Token('y', 12, Token::IDENTIFIER              ),
+                    new Token('*', 12, Token::OPERATOR | Token::RIGHT ),
+                    new Token('+',  9, Token::OPERATOR | Token::RIGHT ),
+                    new Token('2', 15, Token::NUMBER                  ),
+                    new Token('^', 14, Token::OPERATOR | Token::LEFT  ),
+                    new Token('*',  5, Token::OPERATOR | Token::RIGHT ),
+                    new Token('+',  2, Token::OPERATOR | Token::RIGHT ),
+                ]
+            ],
+            [
+                'f(x, y) = g(x + y) + -(h(x - 1)^2 - i(-x, +y))',
+                [
+                    new Token( 'x',  2, Token::IDENTIFIER              ),
+                    new Token( 'y',  5, Token::IDENTIFIER              ),
+                    new Token('f(',  0, Token::FUNCTION | Token::OPEN  ),
+                    new Token( 'x', 12, Token::IDENTIFIER              ),
+                    new Token( 'y', 16, Token::IDENTIFIER              ),
+                    new Token( '+', 14, Token::OPERATOR | Token::RIGHT ),
+                    new Token('g(', 10, Token::FUNCTION | Token::OPEN  ),
+                    new Token( 'x', 25, Token::IDENTIFIER              ),
+                    new Token( '1', 29, Token::NUMBER                  ),
+                    new Token( '-', 27, Token::OPERATOR | Token::RIGHT ),
+                    new Token('h(', 23, Token::FUNCTION | Token::OPEN  ),
+                    new Token( '2', 32, Token::NUMBER                  ),
+                    new Token( '^', 31, Token::OPERATOR | Token::LEFT  ),
+                    new Token( 'x', 39, Token::IDENTIFIER              ),
+                    new Token('-#', 38, Token::OPERATOR | Token::UNARY ),
+                    new Token( 'y', 43, Token::IDENTIFIER              ),
+                    new Token('+#', 42, Token::OPERATOR | Token::UNARY ),
+                    new Token('i(', 36, Token::FUNCTION | Token::OPEN  ),
+                    new Token( '-', 34, Token::OPERATOR | Token::RIGHT ),
+                    new Token('-#', 21, Token::OPERATOR | Token::UNARY ),
+                    new Token( '+', 19, Token::OPERATOR | Token::RIGHT ),
+                    new Token( '=',  8, Token::OPERATOR | Token::LEFT  ),
+                ]
+            ],
+            [
+                'f() * (g() + h())',
+                [
+                    new Token('f(',  0, Token::FUNCTION | Token::OPEN  ),
+                    new Token('g(',  7, Token::FUNCTION | Token::OPEN  ),
+                    new Token('h(', 13, Token::FUNCTION | Token::OPEN  ),
+                    new Token( '+', 11, Token::OPERATOR | Token::RIGHT ),
+                    new Token( '*',  4, Token::OPERATOR | Token::RIGHT ),
+                ],
+            ],
+            [
+                'x + y = 10',
+                [
+                    new Token( 'x', 0, Token::IDENTIFIER              ),
+                    new Token( 'y', 4, Token::IDENTIFIER              ),
+                    new Token( '+', 2, Token::OPERATOR | Token::RIGHT ),
+                    new Token('10', 8, Token::NUMBER                  ),
+                    new Token( '=', 6, Token::OPERATOR | Token::LEFT  ),
+                ]
+            ]
         ];
-
-        /** @var TokenListExpressionBuilderMock $expression */
-        $expression = $this->parser->runParser($testCase);
-        $tokenList = $expression->getTokens();
-
-        $this->assertExpectedTokens($expected, $tokenList);
-    }
-
-    /**
-     * Tests whether empty functions can be parsed.
-     * @since 3.0
-     */
-    public function testIfParsesEmptyFunctionExpression()
-    {
-        $testCase = "f() * (g() + h())";
-
-        $expected = [
-            new Token('f(',  0, Token::FUNCTION | Token::OPEN  ),
-            new Token('g(',  7, Token::FUNCTION | Token::OPEN  ),
-            new Token('h(', 13, Token::FUNCTION | Token::OPEN  ),
-            new Token( '+', 11, Token::OPERATOR | Token::RIGHT ),
-            new Token( '*',  4, Token::OPERATOR | Token::RIGHT ),
-        ];
-
-        /** @var TokenListExpressionBuilderMock $expression */
-        $expression = $this->parser->runParser($testCase);
-        $tokenList = $expression->getTokens();
-
-        $this->assertExpectedTokens($expected, $tokenList);
     }
 
     /**
@@ -195,21 +197,5 @@ final class StatefulParserTest extends TestCase
             [ 'f(1,2,3))'  ],
             [ '((1 + 2)))' ],
         ];
-    }
-
-    /**
-     * Asserts whether the parsed tokens correspond to the expected.
-     * @param TokenInterface[] $expected The list of expected tokens.
-     * @param TokenInterface[] $tokens The list of obtained tokens.
-     */
-    private function assertExpectedTokens(array $expected, array $tokens): void
-    {
-        $this->assertSameSize($expected, $tokens);
-
-        foreach ($tokens as $pos => $token) {
-            $this->assertEquals($expected[$pos]->getData(), $token->getData());
-            $this->assertEquals($expected[$pos]->getType(), $token->getType());
-            $this->assertEquals($expected[$pos]->getPosition(), $token->getPosition());
-        }
     }
 }

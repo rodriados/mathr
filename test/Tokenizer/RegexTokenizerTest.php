@@ -45,72 +45,54 @@ class RegexTokenizerTest extends TestCase
 
     /**
      * Checks whether all token types can be correctly parsed.
+     * @param string $token The single token expression to be tested.
+     * @param int $type The expected token type.
+     * @dataProvider provideTokenTypes
      * @since 3.0
      */
-    public function testForCorrectTokenTypes()
+    public function testForCorrectTokenTypes(string $token, int $type)
     {
-        $testCases = [
-            '9' => Token::NUMBER,
-            'i' => Token::IDENTIFIER,
-            '+' => Token::OPERATOR    | Token::RIGHT,
-            '-' => Token::OPERATOR    | Token::RIGHT,
-            '*' => Token::OPERATOR    | Token::RIGHT,
-            '/' => Token::OPERATOR    | Token::RIGHT,
-            '=' => Token::OPERATOR    | Token::LEFT,
-            '^' => Token::OPERATOR    | Token::LEFT,
-            '(' => Token::PARENTHESIS | Token::OPEN,
-            ')' => Token::PARENTHESIS | Token::CLOSE,
-            ',' => Token::COMMA,
-            '#' => Token::UNKNOWN
+        $tokenList = $this->tokenizer->runTokenizer($token);
+
+        $this->assertEquals(2, count($tokenList));
+        $this->assertEquals($type, $tokenList[0]->getType());
+        $this->assertEquals($token, $tokenList[0]->getData());
+        $this->assertEquals(0, $tokenList[0]->getPosition());
+        $this->assertEquals(Token::EOS, $tokenList[1]->getType());
+    }
+
+    /**
+     * Provides tokens with their expected types.
+     * @return array[] The list of tokens.
+     */
+    public static function provideTokenTypes(): array
+    {
+        return [
+            [ '9', Token::NUMBER                     ],
+            [ 'i', Token::IDENTIFIER                 ],
+            [ '+', Token::OPERATOR    | Token::RIGHT ],
+            [ '-', Token::OPERATOR    | Token::RIGHT ],
+            [ '*', Token::OPERATOR    | Token::RIGHT ],
+            [ '/', Token::OPERATOR    | Token::RIGHT ],
+            [ '=', Token::OPERATOR    | Token::LEFT  ],
+            [ '^', Token::OPERATOR    | Token::LEFT  ],
+            [ '(', Token::PARENTHESIS | Token::OPEN  ],
+            [ ')', Token::PARENTHESIS | Token::CLOSE ],
+            [ ',', Token::COMMA                      ],
+            [ '#', Token::UNKNOWN                    ],
         ];
-
-        foreach ($testCases as $expression => $type) {
-            $tokenList = $this->tokenizer->runTokenizer($expression);
-
-            $this->assertEquals(2, count($tokenList));
-            $this->assertEquals($type, $tokenList[0]->getType());
-            $this->assertEquals(Token::EOS, $tokenList[1]->getType());
-            $this->assertEquals($expression, $tokenList[0]->getData());
-            $this->assertEquals(0, $tokenList[0]->getPosition());
-        }
     }
 
     /**
      * Checks whether a whole expression produces the correct list of tokens.
+     * @param string $expression The expression to be tokenized.
+     * @param array $expected The expression's expected tokens.
+     * @dataProvider provideExpressions
      * @since 3.0
      */
-    public function testIfExpressionCanBeTokenized()
+    public function testIfExpressionCanBeTokenized(string $expression, array $expected)
     {
-        $testCase = 'f(x) = (phi ^ x - (1 - phi) ^ x) / sqrt(5)';
-
-        $expected = [
-            new Token('f',      0, Token::IDENTIFIER                 ),
-            new Token('(',      1, Token::PARENTHESIS | Token::OPEN  ),
-            new Token('x',      2, Token::IDENTIFIER                 ),
-            new Token(')',      3, Token::PARENTHESIS | Token::CLOSE ),
-            new Token('=',      5, Token::OPERATOR    | Token::LEFT  ),
-            new Token('(',      7, Token::PARENTHESIS | Token::OPEN  ),
-            new Token('phi',    8, Token::IDENTIFIER                 ),
-            new Token('^',     12, Token::OPERATOR    | Token::LEFT  ),
-            new Token('x',     14, Token::IDENTIFIER                 ),
-            new Token('-',     16, Token::OPERATOR    | Token::RIGHT ),
-            new Token('(',     18, Token::PARENTHESIS | Token::OPEN  ),
-            new Token('1',     19, Token::NUMBER                     ),
-            new Token('-',     21, Token::OPERATOR    | Token::RIGHT ),
-            new Token('phi',   23, Token::IDENTIFIER                 ),
-            new Token(')',     26, Token::PARENTHESIS | Token::CLOSE ),
-            new Token('^',     28, Token::OPERATOR    | Token::LEFT  ),
-            new Token('x',     30, Token::IDENTIFIER                 ),
-            new Token(')',     31, Token::PARENTHESIS | Token::CLOSE ),
-            new Token('/',     33, Token::OPERATOR    | Token::RIGHT ),
-            new Token('sqrt',  35, Token::IDENTIFIER                 ),
-            new Token('(',     39, Token::PARENTHESIS | Token::OPEN  ),
-            new Token('5',     40, Token::NUMBER                     ),
-            new Token(')',     41, Token::PARENTHESIS | Token::CLOSE ),
-            new Token('',      -1, Token::EOS                        ),
-        ];
-
-        $tokenList = $this->tokenizer->runTokenizer($testCase);
+        $tokenList = $this->tokenizer->runTokenizer($expression);
 
         $this->assertSameSize($expected, $tokenList);
 
@@ -119,5 +101,44 @@ class RegexTokenizerTest extends TestCase
             $this->assertEquals($expected[$pos]->getType(), $token->getType());
             $this->assertEquals($expected[$pos]->getPosition(), $token->getPosition());
         }
+    }
+
+    /**
+     * Provides expressions with their expected list of tokens.
+     * @return array[] The list of expressions.
+     */
+    public static function provideExpressions(): array
+    {
+        return [
+            [
+                'f(x) = (phi ^ x - (1 - phi) ^ x) / sqrt(5)',
+                [
+                    new Token('f',      0, Token::IDENTIFIER                 ),
+                    new Token('(',      1, Token::PARENTHESIS | Token::OPEN  ),
+                    new Token('x',      2, Token::IDENTIFIER                 ),
+                    new Token(')',      3, Token::PARENTHESIS | Token::CLOSE ),
+                    new Token('=',      5, Token::OPERATOR    | Token::LEFT  ),
+                    new Token('(',      7, Token::PARENTHESIS | Token::OPEN  ),
+                    new Token('phi',    8, Token::IDENTIFIER                 ),
+                    new Token('^',     12, Token::OPERATOR    | Token::LEFT  ),
+                    new Token('x',     14, Token::IDENTIFIER                 ),
+                    new Token('-',     16, Token::OPERATOR    | Token::RIGHT ),
+                    new Token('(',     18, Token::PARENTHESIS | Token::OPEN  ),
+                    new Token('1',     19, Token::NUMBER                     ),
+                    new Token('-',     21, Token::OPERATOR    | Token::RIGHT ),
+                    new Token('phi',   23, Token::IDENTIFIER                 ),
+                    new Token(')',     26, Token::PARENTHESIS | Token::CLOSE ),
+                    new Token('^',     28, Token::OPERATOR    | Token::LEFT  ),
+                    new Token('x',     30, Token::IDENTIFIER                 ),
+                    new Token(')',     31, Token::PARENTHESIS | Token::CLOSE ),
+                    new Token('/',     33, Token::OPERATOR    | Token::RIGHT ),
+                    new Token('sqrt',  35, Token::IDENTIFIER                 ),
+                    new Token('(',     39, Token::PARENTHESIS | Token::OPEN  ),
+                    new Token('5',     40, Token::NUMBER                     ),
+                    new Token(')',     41, Token::PARENTHESIS | Token::CLOSE ),
+                    new Token('',      -1, Token::EOS                        ),
+                ]
+            ],
+        ];
     }
 }

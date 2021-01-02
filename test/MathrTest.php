@@ -11,6 +11,7 @@ use Mathr\Mathr;
 use Mathr\Evaluator\Node\NumberNode;
 use Mathr\Contracts\Evaluator\NodeInterface;
 use PHPUnit\Framework\TestCase;
+use Mathr\Contracts\Evaluator\AssignerException;
 
 /**
  * The project's complete integration test class.
@@ -173,7 +174,7 @@ final class MathrTest extends TestCase
     public static function provideUnboundExpressions(): array
     {
         return [
-            [ 'x + y + z',       '(x + y) + z' ],
+            [ 'x + y +-z',      '(x + y) + -z' ],
             [ 'f(x, y+1)',       'f(x, y + 1)' ],
             [ '3f(x)g(y)', '(3 * f(x)) * g(y)' ],
             [ 'x + 3 * 2',             'x + 6' ],
@@ -182,15 +183,15 @@ final class MathrTest extends TestCase
 
     /**
      * Tests whether constants can be stored and retrieved from memory.
-     * @param string $name The name of the constant to be stored in memory.
-     * @param string $contents The constant's contents to store in memory.
+     * @param string $decl The declaration of the constant to be stored in memory.
+     * @param string $name  The name of the constant to retrieve from memory.
      * @param mixed $expected The expected constant's value in memory.
      * @dataProvider provideCustomConstants
      * @since 3.0
      */
-    public function testIfCanStoreConstants(string $name, string $contents, mixed $expected)
+    public function testIfCanStoreConstants(string $decl, string $name, mixed $expected)
     {
-        $this->mathr->evaluate("{$name} = {$contents}");
+        $this->mathr->evaluate($decl);
         $evaluated = $this->mathr->evaluate($name);
 
         $this->assertInstanceOf(NodeInterface::class, $evaluated);
@@ -205,10 +206,10 @@ final class MathrTest extends TestCase
     public static function provideCustomConstants(): array
     {
         return [
-            [ 'a',    '10', '10' ],
-            [ 'b', '2 + 4',  '6' ],
-            [ 'c', 'ln(e)',  '1' ],
-            [ 'd',     'e',  M_E ],
+            [ 'a = 10',    'a', '10' ],
+            [ 'b = 2 + 4', 'b',  '6' ],
+            [ 'c = ln(e)', 'c',  '1' ],
+            [ 'd = e',     'd',  M_E ],
         ];
     }
 
@@ -254,7 +255,7 @@ final class MathrTest extends TestCase
             ],
             [
                 [
-                    'fib(n) = fib(n - 1) + fib(n - 2)',
+                    'fib(n) = (n ^ 3)',
                     'fib(n) = ceil((φ ^ n - (1 - φ) ^ n) / sqrt(5))',
                 ],
                 [
@@ -263,6 +264,34 @@ final class MathrTest extends TestCase
                     'fib(10)' => '55',
                 ]
             ],
+        ];
+    }
+
+    /**
+     * Tests whether invalid assignments are refused.
+     * @param string $expression The expression to be tested.
+     * @dataProvider provideInvalidAssignments
+     * @since 3.0
+     */
+    public function testIfRefusesInvalidAssignments(string $expression)
+    {
+        $this->expectException(AssignerException::class);
+        $this->mathr->evaluate($expression);
+    }
+
+    /**
+     * Provides invalid assignment expressions for testing.
+     * @return string[][] The list of invalid assignments.
+     */
+    public static function provideInvalidAssignments(): array
+    {
+        return [
+            [ 'f(g(x)) = x'  ],
+            [ 'f(1 + 2) = 0' ],
+            [ 'g(x = 1) = 1' ],
+            [ 'x + y = 10'   ],
+            [ 'x + 1 = 10'   ],
+            [ '0 = 0'        ],
         ];
     }
 }

@@ -200,8 +200,7 @@ class StatefulParser extends Parser
         if (!$state->expectOperator)
             [$state, $token] = self::makeUnary($state, $token);
 
-        if ($token->getType(Token::ASSOC_MASK) == Token::RIGHT)
-            $state = self::operatorsToOutput($state, $token);
+        $state = self::operatorsToOutput($state, $token);
 
         $state->stack->push([$token]);
         $state->expectOperator = false;
