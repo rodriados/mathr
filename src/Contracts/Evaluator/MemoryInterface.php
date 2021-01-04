@@ -39,4 +39,10 @@ interface MemoryInterface
      * @return MemoryInterface|null The current memory's parent.
      */
     public function getParentMemory(): ?MemoryInterface;
+
+    /**
+     * Changes the parent memory instance.
+     * @param MemoryInterface|null $parent The new parent memory.
+     */
+    public function setParentMemory(?MemoryInterface $parent): void;
 }

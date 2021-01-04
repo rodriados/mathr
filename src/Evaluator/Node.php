@@ -8,6 +8,7 @@
  */
 namespace Mathr\Evaluator;
 
+use Mathr\Interperter\Token;
 use Mathr\Contracts\Evaluator\NodeInterface;
 use Mathr\Contracts\Interperter\TokenInterface;
 
@@ -59,5 +60,24 @@ abstract class Node implements NodeInterface
     public function strRepr(): string
     {
         return $this->getData();
+    }
+
+    /**
+     * Exports the node by serializing it into a string.
+     * @return string The serialized node string.
+     */
+    public function serialize(): string
+    {
+        return $this->token->serialize();
+    }
+
+    /**
+     * Imports a node by unserializing it from a string.
+     * @param string $serialized The serialized node string.
+     */
+    public function unserialize(string $serialized): void
+    {
+        $this->token = new Token();
+        $this->token->unserialize($serialized);
     }
 }

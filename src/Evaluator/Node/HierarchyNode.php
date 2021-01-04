@@ -50,6 +50,28 @@ abstract class HierarchyNode extends Node
     }
 
     /**
+     * Exports the node by serializing it into a string.
+     * @return string The serialized node string.
+     */
+    public function serialize(): string
+    {
+        return serialize([
+            $this->token->serialize(),
+            $this->hierarchy,
+        ]);
+    }
+
+    /**
+     * Imports a node by unserializing it from a string.
+     * @param string $serialized The serialized node string.
+     */
+    public function unserialize(string $serialized): void
+    {
+        [ $token, $this->hierarchy ] = unserialize($serialized);
+        parent::unserialize($token);
+    }
+
+    /**
      * Evaluates all nodes in hierarchy and return their results.
      * @param MemoryInterface $memory The memory to lookup for bindings.
      * @return NodeInterface[] The produced resulting nodes.

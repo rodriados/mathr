@@ -8,6 +8,7 @@
  */
 namespace Mathr\Evaluator\Memory;
 
+use Serializable;
 use Mathr\Evaluator\Memory;
 use Mathr\Contracts\Evaluator\NodeInterface;
 use Mathr\Contracts\Evaluator\MemoryInterface;
@@ -19,7 +20,7 @@ use Mathr\Contracts\Evaluator\StorableNodeInterface;
  * Keeps track of a scope's variables and functions.
  * @package Mathr\Evaluator\Memory
  */
-class ScopeMemory extends Memory implements MemoryStackInterface
+class ScopeMemory extends Memory implements MemoryStackInterface, Serializable
 {
     /**
      * The function call memory frames.
@@ -81,7 +82,7 @@ class ScopeMemory extends Memory implements MemoryStackInterface
      * @return MemoryStackInterface The newly created memory frame.
      * @throws MemoryException The function call stack is too deep.
      */
-    public function pushFrame(array $bindings): MemoryStackInterface
+    public function framePush(array $bindings): MemoryStackInterface
     {
         if (count($this->frames) > $this->maxDepth)
             throw MemoryException::stackOverflow();
@@ -94,11 +95,35 @@ class ScopeMemory extends Memory implements MemoryStackInterface
      * Pops the last memory frame from the stack.
      * @throws MemoryException There are no frames to be popped.
      */
-    public function popFrame(): void
+    public function framePop(): void
     {
         if (empty($this->frames))
             throw MemoryException::stackIsEmpty();
 
         array_pop($this->frames);
+    }
+
+    /**
+     * Exports the memory's mappings by serializing it into a string.
+     * @return string The serialized memory's mappings string.
+     */
+    public function serialize(): string
+    {
+        return serialize([
+            $this->mapping,
+            $this->maxDepth,
+        ]);
+    }
+
+    /**
+     * Imports a node by unserializing it from a string.
+     * @param string $serialized The serialized node string.
+     */
+    public function unserialize($serialized): void
+    {
+        [
+            $this->mapping,
+            $this->maxDepth,
+        ] = unserialize($serialized);
     }
 }

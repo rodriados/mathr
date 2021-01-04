@@ -20,11 +20,11 @@ interface MemoryStackInterface extends MemoryInterface
      * @return MemoryStackInterface The newly created memory frame.
      * @throws MemoryException The function call stack is too deep.
      */
-    public function pushFrame(array $bindings): MemoryStackInterface;
+    public function framePush(array $bindings): MemoryStackInterface;
 
     /**
      * Pops the last memory frame from the stack.
      * @throws MemoryException There are no frames to be popped.
      */
-    public function popFrame(): void;
+    public function framePop(): void;
 }

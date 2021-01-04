@@ -8,6 +8,7 @@
  */
 namespace Mathr\Interperter;
 
+use Exception;
 use Mathr\Contracts\Interperter\TokenInterface;
 
 /**
@@ -159,6 +160,27 @@ class Token implements TokenInterface
     public function isOf(int $flag): bool
     {
         return $flag == $this->getType($flag);
+    }
+
+    /**
+     * Exports the token by serializing it into a string.
+     * @return string The serialized token string.
+     */
+    public function serialize(): string
+    {
+        return join(':', [ $this->type, $this->data ]);
+    }
+
+    /**
+     * Imports a token by unserializing it from a string.
+     * @param string $serialized The serialized token string.
+     */
+    public function unserialize(string $serialized): void
+    {
+        [
+            $this->type,
+            $this->data,
+        ] = explode(':', $serialized);
     }
 
     /**

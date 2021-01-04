@@ -18,7 +18,7 @@ const DIR_SEPARATOR = DIRECTORY_SEPARATOR;
 function loadFixture(string $classname): bool
 {
     $classname = str_replace(NS_SEPARATOR, DIR_SEPARATOR, $classname);
-    $filename = join(DIR_SEPARATOR, ['test', 'fixtures', "{$classname}.php"]);
+    $filename = join(DIR_SEPARATOR, ['test', 'resources', "{$classname}.php"]);
 
     if (!file_exists($filename))
         return false;

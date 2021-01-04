@@ -8,13 +8,14 @@
  */
 namespace Mathr\Contracts\Evaluator;
 
+use Serializable;
 use Mathr\Contracts\Interperter\TokenInterface;
 
 /**
  * Represents methods commom to all nodes.
  * @package Mathr\Contracts\Evaluator
  */
-interface NodeInterface extends ExpressionInterface
+interface NodeInterface extends ExpressionInterface, Serializable
 {
     /**
      * Retrieves the data represented by the node.

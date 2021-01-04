@@ -32,4 +32,13 @@ abstract class Memory implements MemoryInterface
     {
         return $this->parent;
     }
+
+    /**
+     * Changes the parent memory instance.
+     * @param MemoryInterface|null $parent The new parent memory.
+     */
+    public function setParentMemory(?MemoryInterface $parent): void
+    {
+        $this->parent = $parent;
+    }
 }

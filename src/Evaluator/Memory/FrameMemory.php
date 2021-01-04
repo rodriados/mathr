@@ -47,23 +47,23 @@ class FrameMemory extends Memory implements MemoryStackInterface
      * @return MemoryStackInterface The newly created memory frame.
      * @throws MemoryException The function call stack is too deep.
      */
-    public function pushFrame(array $bindings): MemoryStackInterface
+    public function framePush(array $bindings): MemoryStackInterface
     {
         if (!$this->getParentMemory() instanceof MemoryStackInterface)
             throw MemoryException::stackOverflow();
 
-        return $this->getParentMemory()->pushFrame($bindings);
+        return $this->getParentMemory()->framePush($bindings);
     }
 
     /**
      * Pops the last memory frame from the stack.
      * @throws MemoryException There are no frames to be popped.
      */
-    public function popFrame(): void
+    public function framePop(): void
     {
         if (!$this->getParentMemory() instanceof MemoryStackInterface)
             throw MemoryException::stackIsEmpty();
 
-        $this->getParentMemory()->popFrame();
+        $this->getParentMemory()->framePop();
     }
 }

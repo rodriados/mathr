@@ -26,6 +26,15 @@ class MemoryException extends MathrException
     }
 
     /**
+     * Creates an excetion to when a not-serializable memory is exported.
+     * @return static The exception to be thrown.
+     */
+    public static function memoryCannotBeSerialized(): static
+    {
+        return new static("The selected memory cannot be serialized");
+    }
+
+    /**
      * Creates an exception to when the function call stack is too deep.
      * @return static The exception to be thrown.
      */

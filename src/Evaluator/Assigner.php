@@ -76,7 +76,7 @@ class Assigner
 
         $frame    = new ScopeMemory($memory);
 
-        $contents = $contents->evaluate($frame->pushFrame($mappings ?? []));
+        $contents = $contents->evaluate($frame->framePush($mappings ?? []));
         $previous = $memory->get($binding) ?: [];
 
         return self::addToBindingList($previous, $hierarchy, $contents);

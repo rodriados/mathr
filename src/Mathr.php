@@ -1,6 +1,6 @@
 <?php
 /**
- * Mathr project entry file.
+ * Mathr's interpreter and evaluator integration.
  * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
  * @copyright 2017-present Rodrigo Siqueira
@@ -8,6 +8,8 @@
  */
 namespace Mathr;
 
+use Exception;
+use Serializable;
 use Mathr\Evaluator\Assigner;
 use Mathr\Evaluator\Memory\ScopeMemory;
 use Mathr\Evaluator\Memory\NativeMemory;
@@ -98,5 +100,33 @@ class Mathr
             throw AssignerException::assignmentIsInvalid($decl);
 
         $this->memory->delete($decl);
+    }
+
+    /**
+     * Exports the memory's bindings as a serialized string.
+     * @return string The memory's serialization.
+     * @throws MemoryException The memory cannot be exported.
+     */
+    public function export(): string
+    {
+        if (!$this->memory instanceof Serializable)
+            throw MemoryException::memoryCannotBeSerialized();
+
+        try {
+            return serialize($this->memory);
+        } catch (Exception) {
+            throw MemoryException::memoryCannotBeSerialized();
+        }
+    }
+
+    /**
+     * Imports memory bindings from a serialized string.
+     * @param string $serialized The memory's serialized string.
+     */
+    public function import(string $serialized): void
+    {
+        $memory = unserialize($serialized);
+        $memory->setParentMemory($this->memory->getParentMemory());
+        $this->memory = $memory;
     }
 }

@@ -8,11 +8,13 @@
  */
 namespace Mathr\Contracts\Interperter;
 
+use Serializable;
+
 /**
  * Represents a token extracted from a parsing execution.
  * @package Mathr\Contracts\Interperter
  */
-interface TokenInterface
+interface TokenInterface extends Serializable
 {
     /**
      * Returns the token data, extracted from the expression string.

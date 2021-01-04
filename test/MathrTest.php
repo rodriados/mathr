@@ -291,7 +291,7 @@ final class MathrTest extends TestCase
     /**
      * Tests whether bindings can be manually deleted from memory.
      * @param array[] $decls The assignment declarations.
-     * @param array[] $tests The assingments' test cases.
+     * @param array[] $tests The assignments' test cases.
      * @dataProvider provideManualAssignments
      * @since 3.0
      */
@@ -377,6 +377,125 @@ final class MathrTest extends TestCase
             [ 'x + y = 10'   ],
             [ 'x + 1 = 10'   ],
             [ '0 = 0'        ],
+        ];
+    }
+
+    /**
+     * Tests whether memory bindings can be exported.
+     * @param array $decls The memory declarations to be exported.
+     * @param string $file The fixture file to compare to.
+     * @dataProvider provideExpressionExports
+     * @since 3.0
+     */
+    public function testIfCanExportAssignments(array $decls, string $file)
+    {
+        foreach ($decls as [ $binding, $value ])
+            $this->mathr->set($binding, $value);
+
+        $this->assertEquals(
+            file_get_contents($file),
+            $this->mathr->export()
+        );
+    }
+
+    /**
+     * Provides expressions to be exported from memory.
+     * @return array[] The list of expressions and export file.
+     */
+    public static function provideExpressionExports(): array
+    {
+        return [
+            [
+                [
+                    [ 'fib(0)', 0                         ],
+                    [ 'fib(1)', 1                         ],
+                    [ 'fib(n)', 'fib(n - 1) + fib(n - 2)' ],
+                ],
+                'test/fixtures/export_fibonacci.txt',
+            ],
+            [
+                [
+                    [    'special', 42                        ],
+                    [ 'a000217(n)', '(n * (n + 1)) / 2'       ],
+                    [ 'a002024(n)', 'floor(.5 + sqrt(n * 2))' ],
+                ],
+                'test/fixtures/export_oeis.txt',
+            ],
+            [
+                [
+                    [ 'rectangle(h, w)', 'h * w'               ],
+                    [       'square(s)', 'rectangle(s, s)'     ],
+                    [  'triangle(b, h)', 'rectangle(b, h) / 2' ],
+                    [       'circle(r)', 'pi * r^2'            ],
+                ],
+                'test/fixtures/export_geometry.txt',
+            ],
+        ];
+    }
+
+    /**
+     * Tests whether memory bindings can be imported.
+     * @param string $file The file to import the bindings from.
+     * @param array $tests The bindings' test cases.
+     * @dataProvider provideExpressionImports
+     * @since 3.0
+     */
+    public function testIfCanImportAssignments(string $file, array $tests)
+    {
+        $imported = file_get_contents($file);
+        $this->mathr->import($imported);
+
+        foreach ($tests as [ $expression, $expected ]) {
+            $evaluated = $this->mathr->evaluate($expression);
+            $this->assertInstanceOf(NodeInterface::class, $evaluated);
+            $this->assertEquals($expected, $evaluated->strRepr());
+        }
+    }
+
+    /**
+     * Provides expressions to be imported to memory.
+     * @return array[] The file to be imported and list of expressions for testing.
+     */
+    public static function provideExpressionImports(): array
+    {
+        return [
+            [
+                'test/fixtures/export_fibonacci.txt',
+                [
+                    [  'fib(0)',  0 ],
+                    [  'fib(1)',  1 ],
+                    [  'fib(2)',  1 ],
+                    [  'fib(3)',  2 ],
+                    [ 'fib(10)', 55 ]
+                ],
+            ],
+            [
+                'test/fixtures/export_oeis.txt',
+                [
+                    [    'special', 42 ],
+                    [ 'a000217(1)',  1 ],
+                    [ 'a000217(2)',  3 ],
+                    [ 'a000217(3)',  6 ],
+                    [ 'a000217(4)', 10 ],
+                    [ 'a000217(9)', 45 ],
+                    [ 'a002024(1)',  1 ],
+                    [ 'a002024(2)',  2 ],
+                    [ 'a002024(3)',  2 ],
+                    [ 'a002024(4)',  3 ],
+                    [ 'a002024(9)',  4 ],
+                ],
+            ],
+            [
+                'test/fixtures/export_geometry.txt',
+                [
+                    [  'rectangle(3, 5)',   15 ],
+                    [ 'rectangle(pi, 1)', M_PI ],
+                    [      'square(2.5)', 6.25 ],
+                    [       'square(10)',  100 ],
+                    [  'triangle(7, 10)',   35 ],
+                    [        'circle(1)', M_PI ],
+                ],
+            ],
         ];
     }
 }

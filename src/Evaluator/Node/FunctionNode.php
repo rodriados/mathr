@@ -175,9 +175,9 @@ class FunctionNode extends HierarchyNode implements StorableNodeInterface
         array $params = []
     ): NodeInterface
     {
-        $frame  = $memory->pushFrame(self::bindParameters($params));
+        $frame  = $memory->framePush(self::bindParameters($params));
         $result = $funcbody->evaluate($frame);
-                  $memory->popFrame();
+                  $memory->framePop();
 
         return $result;
     }
