@@ -1,143 +1,132 @@
 <?php
 /**
- * Mathr\Mathr class file.
+ * Mathr's interpreter and evaluator integration.
  * @package Mathr
  * @author Rodrigo Siqueira <rodriados@gmail.com>
+ * @copyright 2017-present Rodrigo Siqueira
  * @license MIT License
- * @copyright 2017-2018 Rodrigo Siqueira
  */
 namespace Mathr;
 
-use Mathr\Node\FunctionNode;
-use Mathr\Node\VariableNode;
-use Mathr\Exception\MathrException;
+use Exception;
+use Serializable;
+use Mathr\Evaluator\Assigner;
+use Mathr\Evaluator\Memory\ScopeMemory;
+use Mathr\Evaluator\Memory\NativeMemory;
+use Mathr\Interperter\Parser\DefaultParser;
+use Mathr\Contracts\Evaluator\NodeInterface;
+use Mathr\Contracts\Evaluator\MemoryInterface;
+use Mathr\Contracts\Evaluator\MemoryException;
+use Mathr\Contracts\Interperter\ParserException;
+use Mathr\Contracts\Interperter\ParserInterface;
+use Mathr\Contracts\Evaluator\AssignerException;
+use Mathr\Interperter\Tokenizer\DefaultTokenizer;
+use Mathr\Contracts\Evaluator\StorableNodeInterface;
 
+/**
+ * Parses and evaluates expresions, and manages expression bindings.
+ * @package Mathr
+ */
 class Mathr
 {
-	/**
-	 * Parser instance.
-	 * @var Parser Instance responsible for parsing the expressions.
-	 */
-	protected $parser;
-	
-	/**
-	 * Scope instance.
-	 * @var Scope Instance responsible for storing all variables and functions.
-	 */
-	protected $scope;
-	
-	/**
-	 * Mathr constructor.
-	 * This constructor simply initializes the scope and parser instances
-	 * needed for evaluating mathematical expressions.
-	 */
-	public function __construct()
-	{
-		srand(time());
-		$this->parser = new Parser;
-		$this->scope = new Scope;
-	}
-	
-	/**
-	 * Evaluates a mathematical expression, stores its definition or returns a
-	 * node as an expected value.
-	 * @param string $expr Expression to be evaluated.
-	 * @return number|array Value of all numeric expressions.
-	 */
-	public function evaluate(string $expr)
-	{
-		$expr = explode(';', trim($expr, ';'));
-		$return = [];
-		$ret = [];
-		
-		foreach($expr as $command)
-			$return[] = $this->parser
-				->parse($command)
-				->evaluate($this->scope);
-		
-		foreach($return as &$r)
-			if($r instanceof Node\NumberNode)
-				$ret[] = $r->getValue();
-		
-		return count($ret) == 1 ? $ret[0] : $ret;
-	}
-	
-	/**
-	 * Stores a variable into the scope.
-	 * @param string $name The variable name.
-	 * @param string $value The variable value.
-	 */
-	public function setVariable(string $name, string $value)
-	{
-		$this->scope->setVariable(
-			new VariableNode('$'.trim($name)),
-			$this->parser->parse($value)->evaluate($this->scope)
-		);
-	}
-	
-	/**
-	 * Stores many variables to the scope.
-	 * @param array $data Variables names and values.
-	 */
-	public function setVariables(array $data)
-	{
-		foreach($data as $name => $value)
-			$this->setVariable($name, $value);
-	}
-	
-	/**
-	 * Deletes a variable from the scope.
-	 * @param string $name Variable to delete.
-	 */
-	public function delVariable(string $name)
-	{
-		$this->scope->delVariable($name);
-	}
-	
-	/**
-	 * Stores a function into the scope.
-	 * @param string $decl The function declaration.
-	 * @param string $block The function block.
-	 * @throws MathrException
-	 */
-	public function setFunction(string $decl, string $block)
-	{
-		$decl = $this->parser->parse($decl)->build();
-		$block = $this->parser->parse($block)->build();
-		
-		if(!$decl instanceof FunctionNode)
-			throw MathrException::noFunction($decl);
-		
-		$this->scope->setFunction(
-			$decl->processBody($block),
-			$block
-		);
-	}
-	
-	/**
-	 * Deletes a function from the scope, using its name.
-	 * @param string $name The function name.
-	 */
-	public function delFunction(string $name)
-	{
-		$this->scope->delFunction($name);
-	}
-	
-	/**
-	 * Exports the current scope as a JSON string.
-	 * @return string The current scope exported.
-	 */
-	public function export(): string
-	{
-		return json_encode($this->scope->export());
-	}
-	
-	/**
-	 * Imports a JSON formatted string.
-	 * @param string $data Exported data to import.
-	 */
-	public function import(string $data)
-	{
-		$this->scope->import(json_decode($data, true));
-	}
+    /**
+     * The memory instance for binding identifiers and functions.
+     * @var MemoryInterface The memory instance.
+     */
+    protected MemoryInterface $memory;
+
+    /**
+     * The parser instance for parsing expressions into evaluable nodes.
+     * @var ParserInterface The parser instance.
+     */
+    protected ParserInterface $parser;
+
+    /**
+     * Mathr constructor.
+     * @param MemoryInterface|null $memory The binding memory instance.
+     * @param ParserInterface|null $parser The expression parser instance.
+     */
+    public function __construct(
+        ?MemoryInterface $memory = null,
+        ?ParserInterface $parser = null,
+    ) {
+        $this->memory = $memory ?: new ScopeMemory(new NativeMemory);
+        $this->parser = $parser ?: new DefaultParser(new DefaultTokenizer);
+    }
+
+    /**
+     * Evaluates the given expression and produces a result.
+     * @param string $expression The expression to be evaluated.
+     * @return NodeInterface The produced resulting node.
+     * @throws ParserException The expression is invalid.
+     */
+    public function evaluate(string $expression): NodeInterface
+    {
+        return $this->parser
+            ->runParser($expression)
+            ->getExpression()
+            ->evaluate($this->memory);
+    }
+
+    /**
+     * Assigns an expression to the given declaration.
+     * @param string $decl The declaration to be assigned to.
+     * @param mixed $expression The expression to be bound.
+     * @throws AssignerException The given declaration is invalid.
+     * @throws ParserException The given expression is invalid.
+     * @throws MemoryException The memory stack was overflown while evaluating contents.
+     */
+    public function set(string $decl, mixed $expression): void
+    {
+        $decl = $this->parser->runParser($decl)->getRaw();
+
+        if (!is_callable($expression) && (is_string($expression) || is_numeric($expression)))
+            $expression = $this->parser->runParser($expression)->getRaw();
+
+        Assigner::assignToMemory($this->memory, $decl, $expression);
+    }
+
+    /**
+     * Removes a variable or function binding from the memory.
+     * @param string $decl The declaration to be removed from memory.
+     * @throws AssignerException The given declaration is invalid.
+     * @throws ParserException The given expression is invalid.
+     */
+    public function delete(string $decl): void
+    {
+        $decl = $this->parser->runParser($decl)->getRaw();
+
+        if (!$decl instanceof StorableNodeInterface)
+            throw AssignerException::assignmentIsInvalid($decl);
+
+        $this->memory->delete($decl);
+    }
+
+    /**
+     * Exports the memory's bindings as a serialized string.
+     * @return string The memory's serialization.
+     * @throws MemoryException The memory cannot be exported.
+     */
+    public function export(): string
+    {
+        if (!$this->memory instanceof Serializable)
+            throw MemoryException::memoryCannotBeSerialized();
+
+        try {
+            return serialize($this->memory);
+        } catch (Exception) {
+            throw MemoryException::memoryCannotBeSerialized();
+        }
+    }
+
+    /**
+     * Imports memory bindings from a serialized string.
+     * @param string $serialized The memory's serialized string.
+     */
+    public function import(string $serialized): void
+    {
+        $memory = unserialize($serialized);
+        $memory->setParentMemory($this->memory->getParentMemory());
+        $this->memory = $memory;
+    }
 }

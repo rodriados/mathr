@@ -1,26 +1,23 @@
 {
-	"name": "rodriados/mathr",
-	"description": "Math expressions: parser and evaluator.",
-	"keywords": [
-		"math", "mathematics", "parser", "evaluator",
-		"math expression"
-	],
-	"license": "MIT",
-	"author": [
-		{
-			"name": "Rodrigo Siqueira",
-			"email": "rodriados@gmail.com"
-		}
-	],
-	"require": {
-		"php": ">=7.0.0"
-	},
-	"autoload": {
-		"psr-4": {
-			"Mathr\\": "src/"
-		}
-	},
-	"archive": {
-		"exclude": ["/test"]
-	}
+  "name": "rodriados/mathr",
+  "description": "Math expressions: parser and evaluator.",
+  "keywords": [
+    "math", "mathematics", "parser", "evaluator",
+    "math expression"
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=8.0"
+  },
+  "suggest": {
+    "ext-bcmath": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Mathr\\": "src/"
+    }
+  },
+  "archive": {
+    "exclude": ["/test"]
+  }
 }
