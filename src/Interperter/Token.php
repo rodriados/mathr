@@ -177,10 +177,7 @@ class Token implements TokenInterface
      */
     public function unserialize(string $serialized): void
     {
-        [
-            $this->type,
-            $this->data,
-        ] = explode(':', $serialized);
+        [ $this->type, $this->data ] = explode(':', $serialized);
     }
 
     /**

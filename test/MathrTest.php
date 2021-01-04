@@ -11,6 +11,7 @@ use Mathr\Mathr;
 use Mathr\Contracts\MathrException;
 use Mathr\Evaluator\Node\NumberNode;
 use Mathr\Contracts\Evaluator\NodeInterface;
+use Mathr\Contracts\Evaluator\MemoryException;
 use Mathr\Contracts\Evaluator\AssignerException;
 use Mathr\Contracts\Evaluator\EvaluationException;
 use PHPUnit\Framework\TestCase;
@@ -494,6 +495,45 @@ final class MathrTest extends TestCase
                     [       'square(10)',  100 ],
                     [  'triangle(7, 10)',   35 ],
                     [        'circle(1)', M_PI ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Tests whether an exception is thrown when expressions cannot be exported.
+     * @param array $decls The expressions for invalid exports.
+     * @dataProvider provideExpressionInvalidExports
+     * @since 3.0
+     */
+    public function testIfRejectsInvalidExport(array $decls)
+    {
+        $this->expectException(MemoryException::class);
+        $this->expectExceptionMessage('The selected memory cannot be serialized');
+
+        foreach ($decls as [ $binding, $value ])
+            $this->mathr->set($binding, $value);
+
+        $this->mathr->export();
+    }
+
+    /**
+     * Provides invalid expressions to be exported from memory.
+     * @return array[] The list of invalid expressions for exporting.
+     */
+    public static function provideExpressionInvalidExports(): array
+    {
+        return [
+            [
+                [
+                    [ 'a000217(n)', fn ($n) => ($n * ($n + 1)) / 2      ],
+                    [ 'a002024(n)', fn ($n) => floor(.5 + sqrt($n * 2)) ],
+                ],
+            ],
+            [
+                [
+                    [ 'rectangle(h, w)', fn ($h, $w) => $h * $w ],
+                    [       'square(s)', fn ($s) => $s ** 2     ],
                 ],
             ],
         ];

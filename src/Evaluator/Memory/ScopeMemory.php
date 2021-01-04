@@ -121,9 +121,6 @@ class ScopeMemory extends Memory implements MemoryStackInterface, Serializable
      */
     public function unserialize($serialized): void
     {
-        [
-            $this->mapping,
-            $this->maxDepth,
-        ] = unserialize($serialized);
+        [ $this->mapping, $this->maxDepth ] = unserialize($serialized);
     }
 }
