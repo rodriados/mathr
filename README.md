@@ -42,7 +42,7 @@ There are a plenty of native functions and variables which you can use at will.
 
 ```php
 <?php
-$mathr->evaluate("fibonacci(x) = ceil((φ ^ n - (1 - φ) ^ n) / sqrt(5))");
+$mathr->evaluate("fibonacci(x) = ceil((φ ^ x - (1 - φ) ^ x) / sqrt(5))");
 $result = $mathr->evaluate("fibonacci(10)");
 echo $result; // 55
 ```
