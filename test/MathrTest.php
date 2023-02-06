@@ -14,6 +14,7 @@ use Mathr\Contracts\Evaluator\NodeInterface;
 use Mathr\Contracts\Evaluator\MemoryException;
 use Mathr\Contracts\Evaluator\AssignerException;
 use Mathr\Contracts\Evaluator\EvaluationException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -50,9 +51,9 @@ final class MathrTest extends TestCase
      * Tests whether a simple expression can be evaluated.
      * @param string $expression The expression to be tested.
      * @param string $expected The expected test result.
-     * @dataProvider provideSimpleExpressions
      * @since 3.0
      */
+    #[DataProvider("provideSimpleExpressions")]
     public function testIfParsesSimpleExpression(string $expression, string $expected)
     {
         $evaluated = $this->mathr->evaluate($expression);
@@ -66,7 +67,7 @@ final class MathrTest extends TestCase
      * Provides simple valid expressions for testing.
      * @return string[][] The expressions and their expected result.
      */
-    public function provideSimpleExpressions(): array
+    public static function provideSimpleExpressions(): array
     {
         return [
             [  "2.1 + 3.3",    "5.4" ],
@@ -85,16 +86,16 @@ final class MathrTest extends TestCase
      * Tests whether native constants can be evaluated.
      * @param string $name The name of the constant to be retrieved.
      * @param float $expected The expected constant value.
-     * @dataProvider provideNativeConstants
      * @since 3.0
      */
+    #[DataProvider("provideNativeConstants")]
     public function testIfEvaluatesNativeConstants(string $name, float $expected)
     {
         $evaluated = $this->mathr->evaluate($name);
 
         $this->assertInstanceOf(NodeInterface::class, $evaluated);
         $this->assertInstanceOf(NumberNode::class, $evaluated);
-        $this->assertEquals($expected, $evaluated->strRepr());
+        $this->assertEquals((string) $expected, $evaluated->strRepr());
     }
 
     /**
@@ -119,9 +120,9 @@ final class MathrTest extends TestCase
      * Tests whether function expressions can be evaluated.
      * @param string $expression The expression to be tested.
      * @param string $expected The expected test result.
-     * @dataProvider provideFunctionExpressions
      * @since 3.0
      */
+    #[DataProvider("provideFunctionExpressions")]
     public function testIfEvaluatesFunctionExpressions(string $expression, string $expected)
     {
         $evaluated = $this->mathr->evaluate($expression);
@@ -158,9 +159,9 @@ final class MathrTest extends TestCase
      * Tests whether expressions with unbound variables can be evaluated.
      * @param string $expression The expression to be tested.
      * @param string $expected The expected test result.
-     * @dataProvider provideUnboundExpressions
      * @since 3.0
      */
+    #[DataProvider("provideUnboundExpressions")]
     public function testIfEvaluatesUnboundExpressions(string $expression, string $expected)
     {
         $evaluated = $this->mathr->evaluate($expression);
@@ -189,9 +190,9 @@ final class MathrTest extends TestCase
      * @param string $decl The declaration of the constant to be stored in memory.
      * @param string $name  The name of the constant to retrieve from memory.
      * @param mixed $expected The expected constant's value in memory.
-     * @dataProvider provideCustomConstants
      * @since 3.0
      */
+    #[DataProvider("provideCustomConstants")]
     public function testIfCanStoreConstants(string $decl, string $name, mixed $expected)
     {
         $this->mathr->evaluate($decl);
@@ -199,7 +200,7 @@ final class MathrTest extends TestCase
 
         $this->assertInstanceOf(NodeInterface::class, $evaluated);
         $this->assertInstanceOf(NumberNode::class, $evaluated);
-        $this->assertEquals($expected, $evaluated->strRepr());
+        $this->assertEquals((string) $expected, $evaluated->strRepr());
     }
 
     /**
@@ -220,9 +221,9 @@ final class MathrTest extends TestCase
      * Tests whether functions can be stored and retrieved from memory.
      * @param string[] $decls The list of functions declarations.
      * @param string[] $tests The list of tests for each function.
-     * @dataProvider provideCustomFunctions
      * @since 3.0
      */
+    #[DataProvider("provideCustomFunctions")]
     public function testIfCanStoreFunctions(array $decls, array $tests)
     {
         foreach ($decls as $decl)
@@ -274,9 +275,9 @@ final class MathrTest extends TestCase
      * Tests whether assignments can be created manually.
      * @param array[] $decls The assignment declarations.
      * @param array[] $tests The assingments' test cases.
-     * @dataProvider provideManualAssignments
      * @since 3.0
      */
+    #[DataProvider("provideManualAssignments")]
     public function testIfCanManuallyCreateAssignments(array $decls, array $tests)
     {
         foreach ($decls as [ $binding, $value ])
@@ -293,9 +294,9 @@ final class MathrTest extends TestCase
      * Tests whether bindings can be manually deleted from memory.
      * @param array[] $decls The assignment declarations.
      * @param array[] $tests The assignments' test cases.
-     * @dataProvider provideManualAssignments
      * @since 3.0
      */
+    #[DataProvider("provideManualAssignments")]
     public function testIfCanManuallyRemoveAssignments(array $decls, array $tests)
     {
         foreach ($decls as [ $binding, $value ])
@@ -356,9 +357,9 @@ final class MathrTest extends TestCase
     /**
      * Tests whether invalid assignments are refused.
      * @param string $expression The expression to be tested.
-     * @dataProvider provideInvalidAssignments
      * @since 3.0
      */
+    #[DataProvider("provideInvalidAssignments")]
     public function testIfRefusesInvalidAssignments(string $expression)
     {
         $this->expectException(AssignerException::class);
@@ -385,9 +386,9 @@ final class MathrTest extends TestCase
      * Tests whether memory bindings can be exported.
      * @param array $decls The memory declarations to be exported.
      * @param string $file The fixture file to compare to.
-     * @dataProvider provideExpressionExports
      * @since 3.0
      */
+    #[DataProvider("provideExpressionExports")]
     public function testIfCanExportAssignments(array $decls, string $file)
     {
         foreach ($decls as [ $binding, $value ])
@@ -438,9 +439,9 @@ final class MathrTest extends TestCase
      * Tests whether memory bindings can be imported.
      * @param string $file The file to import the bindings from.
      * @param array $tests The bindings' test cases.
-     * @dataProvider provideExpressionImports
      * @since 3.0
      */
+    #[DataProvider("provideExpressionImports")]
     public function testIfCanImportAssignments(string $file, array $tests)
     {
         $imported = file_get_contents($file);
@@ -449,7 +450,7 @@ final class MathrTest extends TestCase
         foreach ($tests as [ $expression, $expected ]) {
             $evaluated = $this->mathr->evaluate($expression);
             $this->assertInstanceOf(NodeInterface::class, $evaluated);
-            $this->assertEquals($expected, $evaluated->strRepr());
+            $this->assertEquals((string) $expected, $evaluated->strRepr());
         }
     }
 
@@ -503,9 +504,9 @@ final class MathrTest extends TestCase
     /**
      * Tests whether an exception is thrown when expressions cannot be exported.
      * @param array $decls The expressions for invalid exports.
-     * @dataProvider provideExpressionInvalidExports
      * @since 3.0
      */
+    #[DataProvider("provideExpressionInvalidExports")]
     public function testIfRejectsInvalidExport(array $decls)
     {
         $this->expectException(MemoryException::class);

@@ -36,6 +36,25 @@ abstract class Node implements NodeInterface
     }
 
     /**
+     * Exports the components of a node for serialization.
+     * @return array The exported node's components.
+     */
+    public function __serialize(): array
+    {
+        return [ $this->token->serialize() ];
+    }
+
+    /**
+     * Unserializes a node from its components.
+     * @param array $data The node's components.
+     */
+    public function __unserialize(array $data): void
+    {
+        [ $token ] = $data;
+        $this->unserialize($token);
+    }
+
+    /**
      * Retrieves the data represented by the node.
      * @return string The node's internal data.
      */

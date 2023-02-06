@@ -14,6 +14,7 @@ use Mathr\Evaluator\Memory\NativeMemory;
 use Mathr\Evaluator\Node\IdentifierNode;
 use Mathr\Contracts\Evaluator\MemoryException;
 use Mathr\Contracts\Evaluator\MemoryInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -52,9 +53,9 @@ final class NativeMemoryTest extends TestCase
      * Checks whether the memory can get native constants.
      * @param string $name The name of the constant to be retrieved.
      * @param float $expected The expected constant value.
-     * @dataProvider provideNativeConstants
      * @since 3.0
      */
+    #[DataProvider("provideNativeConstants")]
     public function testIfCanGetNativeConstants(string $name, float $expected)
     {
         $node = IdentifierNode::make($name);
@@ -84,15 +85,19 @@ final class NativeMemoryTest extends TestCase
      * @param string $name The name of the function to be retrieved.
      * @param array $args The list of arguments to execute the function with.
      * @param callable $expected The expected callable to retrieve from memory.
-     * @dataProvider provideNativeFunctions
      * @since 3.0
      */
-    public function testIfCanGetNativeFunctions(string $name, array $args, callable $expected)
+    #[DataProvider("provideNativeFunctions")]
+    public function testIfCanGetNativeFunctions(string $name, array $args, callable $expected, ?int $precision)
     {
-        $node = FunctionNode::make($name, array_map(fn ($x) => NumberNode::make($x), $args));
+        $parameters = array_map([NumberNode::class, 'make'], $args);
+        $function = FunctionNode::make($name, $parameters);
 
         $expected = $expected (...$args);
-        $retrieved = $this->memory->get($node);
+        $retrieved = $this->memory->get($function);
+
+        if (!is_null($precision))
+            $expected = round($expected, $precision);
 
         if (is_nan($expected)) $this->assertNan($retrieved (...$args));
         else $this->assertEquals($expected, $retrieved (...$args));
@@ -127,100 +132,100 @@ final class NativeMemoryTest extends TestCase
     public static function provideNativeFunctions(): array
     {
         return [
-            [ 'abs',     [      -39 ],     'abs' ],
-            [ 'abs',     [       48 ],     'abs' ],
-            [ 'abs',     [     -3.9 ],     'abs' ],
-            [ 'abs',     [      3.9 ],     'abs' ],
-            [ 'acos',    [        3 ],    'acos' ],
-            [ 'acos',    [     M_PI ],    'acos' ],
-            [ 'acos',    [    -M_PI ],    'acos' ],
-            [ 'acosh',   [        3 ],   'acosh' ],
-            [ 'acosh',   [     M_PI ],   'acosh' ],
-            [ 'acosh',   [    -M_PI ],   'acosh' ],
-            [ 'asin',    [        3 ],    'asin' ],
-            [ 'asin',    [     M_PI ],    'asin' ],
-            [ 'asin',    [    -M_PI ],    'asin' ],
-            [ 'asinh',   [        3 ],   'asinh' ],
-            [ 'asinh',   [     M_PI ],   'asinh' ],
-            [ 'asinh',   [    -M_PI ],   'asinh' ],
-            [ 'atan',    [        3 ],    'atan' ],
-            [ 'atan',    [     M_PI ],    'atan' ],
-            [ 'atan',    [    -M_PI ],    'atan' ],
-            [ 'atanh',   [        3 ],   'atanh' ],
-            [ 'atanh',   [     M_PI ],   'atanh' ],
-            [ 'atanh',   [    -M_PI ],   'atanh' ],
-            [ 'ceil',    [      3.4 ],    'ceil' ],
-            [ 'ceil',    [        3 ],    'ceil' ],
-            [ 'ceil',    [     -3.4 ],    'ceil' ],
-            [ 'ceil',    [       -3 ],    'ceil' ],
-            [ 'cos',     [        3 ],     'cos' ],
-            [ 'cos',     [     M_PI ],     'cos' ],
-            [ 'cos',     [    -M_PI ],     'cos' ],
-            [ 'cosh',    [        3 ],    'cosh' ],
-            [ 'cosh',    [     M_PI ],    'cosh' ],
-            [ 'cosh',    [    -M_PI ],    'cosh' ],
-            [ 'deg2rad', [       90 ], 'deg2rad' ],
-            [ 'deg2rad', [      -90 ], 'deg2rad' ],
-            [ 'deg2rad', [      180 ], 'deg2rad' ],
-            [ 'deg2rad', [     -180 ], 'deg2rad' ],
-            [ 'floor',   [      3.4 ],   'floor' ],
-            [ 'floor',   [        3 ],   'floor' ],
-            [ 'floor',   [     -3.4 ],   'floor' ],
-            [ 'floor',   [       -3 ],   'floor' ],
-            [ 'rad2deg', [     M_PI ], 'rad2deg' ],
-            [ 'rad2deg', [    -M_PI ], 'rad2deg' ],
-            [ 'rad2deg', [ 2 * M_PI ], 'rad2deg' ],
-            [ 'rad2deg', [ 3 * M_PI ], 'rad2deg' ],
-            [ 'sin',     [        3 ],     'sin' ],
-            [ 'sin',     [     M_PI ],     'sin' ],
-            [ 'sin',     [    -M_PI ],     'sin' ],
-            [ 'sinh',    [        3 ],    'sinh' ],
-            [ 'sinh',    [     M_PI ],    'sinh' ],
-            [ 'sinh',    [    -M_PI ],    'sinh' ],
-            [ 'sqrt',    [        2 ],    'sqrt' ],
-            [ 'sqrt',    [        3 ],    'sqrt' ],
-            [ 'sqrt',    [        4 ],    'sqrt' ],
-            [ 'sqrt',    [        5 ],    'sqrt' ],
-            [ 'tan',     [        3 ],     'tan' ],
-            [ 'tan',     [     M_PI ],     'tan' ],
-            [ 'tan',     [    -M_PI ],     'tan' ],
-            [ 'tanh',    [        3 ],    'tanh' ],
-            [ 'tanh',    [     M_PI ],    'tanh' ],
-            [ 'tanh',    [    -M_PI ],    'tanh' ],
-            [ 'max',     [     1, 2 ],     'max' ],
-            [ 'max',     [  1, 7, 2 ],     'max' ],
-            [ 'max',     [  9, 4, 6 ],     'max' ],
-            [ 'min',     [     7, 6 ],     'min' ],
-            [ 'min',     [  8, 1, 9 ],     'min' ],
-            [ 'min',     [  1, 9, 2 ],     'min' ],
-            [ 'hypot',   [     2, 3 ],   'hypot' ],
-            [ 'hypot',   [ 2.5, 3.5 ],   'hypot' ],
-            [ 'hypot',   [   10, 11 ],   'hypot' ],
-            [ 'log',     [        1 ],     'log' ],
-            [ 'log',     [        2 ],     'log' ],
-            [ 'log',     [       10 ],     'log' ],
-            [ 'log',     [     0, 2 ],     'log' ],
-            [ 'log',     [     8, 2 ],     'log' ],
-            [ 'log',     [  100, 10 ],     'log' ],
-            [ 'mod',     [ 2.5, 3.5 ],    'fmod' ],
-            [ 'mod',     [ 118, 7.5 ],    'fmod' ],
-            [ 'mod',     [ 2.5, 3.7 ],    'fmod' ],
-            [ 'mod',     [    18, 7 ], fn ($x, $y) => $x % $y ],
-            [ 'mod',     [   100, 9 ], fn ($x, $y) => $x % $y ],
-            [ 'mod',     [   50, 25 ], fn ($x, $y) => $x % $y ],
-            [ 'round',   [        2 ],   'round' ],
-            [ 'round',   [      5.0 ],   'round' ],
-            [ 'round',   [   7.8954 ],   'round' ],
-            [ 'round',   [   9.9999 ],   'round' ],
-            [ 'round',   [  18.0032 ],   'round' ],
-            [ 'round',   [ 5.091, 2 ],   'round' ],
-            [ 'round',   [ 5.099, 2 ],   'round' ],
-            [ 'round',   [ 0.793, 1 ],   'round' ],
-            [ 'round',   [ 0.223, 3 ],   'round' ],
-            [ 'rt',      [     2, 2 ], fn ($x, $y) => pow($x, fdiv(1., $y)) ],
-            [ 'rt',      [     8, 3 ], fn ($x, $y) => pow($x, fdiv(1., $y)) ],
-            [ 'rt',      [    27, 3 ], fn ($x, $y) => pow($x, fdiv(1., $y)) ],
-            [ 'rt',      [ 5.656, 3 ], fn ($x, $y) => pow($x, fdiv(1., $y)) ],
+            [ 'abs',     [      -39 ],     'abs', null ],
+            [ 'abs',     [       48 ],     'abs', null ],
+            [ 'abs',     [     -3.9 ],     'abs', null ],
+            [ 'abs',     [      3.9 ],     'abs', null ],
+            [ 'acos',    [        3 ],    'acos',   12 ],
+            [ 'acos',    [     M_PI ],    'acos',   12 ],
+            [ 'acos',    [    -M_PI ],    'acos',   12 ],
+            [ 'acosh',   [        3 ],   'acosh',   12 ],
+            [ 'acosh',   [     M_PI ],   'acosh',   12 ],
+            [ 'acosh',   [    -M_PI ],   'acosh',   12 ],
+            [ 'asin',    [        3 ],    'asin',   12 ],
+            [ 'asin',    [     M_PI ],    'asin',   12 ],
+            [ 'asin',    [    -M_PI ],    'asin',   12 ],
+            [ 'asinh',   [        3 ],   'asinh',   12 ],
+            [ 'asinh',   [     M_PI ],   'asinh',   12 ],
+            [ 'asinh',   [    -M_PI ],   'asinh',   12 ],
+            [ 'atan',    [        3 ],    'atan',   12 ],
+            [ 'atan',    [     M_PI ],    'atan',   12 ],
+            [ 'atan',    [    -M_PI ],    'atan',   12 ],
+            [ 'atanh',   [        3 ],   'atanh',   12 ],
+            [ 'atanh',   [     M_PI ],   'atanh',   12 ],
+            [ 'atanh',   [    -M_PI ],   'atanh',   12 ],
+            [ 'ceil',    [      3.4 ],    'ceil', null ],
+            [ 'ceil',    [        3 ],    'ceil', null ],
+            [ 'ceil',    [     -3.4 ],    'ceil', null ],
+            [ 'ceil',    [       -3 ],    'ceil', null ],
+            [ 'cos',     [        3 ],     'cos',   12 ],
+            [ 'cos',     [     M_PI ],     'cos',   12 ],
+            [ 'cos',     [    -M_PI ],     'cos',   12 ],
+            [ 'cosh',    [        3 ],    'cosh',   12 ],
+            [ 'cosh',    [     M_PI ],    'cosh',   12 ],
+            [ 'cosh',    [    -M_PI ],    'cosh',   12 ],
+            [ 'deg2rad', [       90 ], 'deg2rad',   12 ],
+            [ 'deg2rad', [      -90 ], 'deg2rad',   12 ],
+            [ 'deg2rad', [      180 ], 'deg2rad',   12 ],
+            [ 'deg2rad', [     -180 ], 'deg2rad',   12 ],
+            [ 'floor',   [      3.4 ],   'floor', null ],
+            [ 'floor',   [        3 ],   'floor', null ],
+            [ 'floor',   [     -3.4 ],   'floor', null ],
+            [ 'floor',   [       -3 ],   'floor', null ],
+            [ 'rad2deg', [     M_PI ], 'rad2deg',   12 ],
+            [ 'rad2deg', [    -M_PI ], 'rad2deg',   12 ],
+            [ 'rad2deg', [ 2 * M_PI ], 'rad2deg',   12 ],
+            [ 'rad2deg', [ 3 * M_PI ], 'rad2deg',   12 ],
+            [ 'sin',     [        3 ],     'sin',   12 ],
+            [ 'sin',     [     M_PI ],     'sin',   12 ],
+            [ 'sin',     [    -M_PI ],     'sin',   12 ],
+            [ 'sinh',    [        3 ],    'sinh',   12 ],
+            [ 'sinh',    [     M_PI ],    'sinh',   12 ],
+            [ 'sinh',    [    -M_PI ],    'sinh',   12 ],
+            [ 'sqrt',    [        2 ],    'sqrt',   12 ],
+            [ 'sqrt',    [        3 ],    'sqrt',   12 ],
+            [ 'sqrt',    [        4 ],    'sqrt',   12 ],
+            [ 'sqrt',    [        5 ],    'sqrt',   12 ],
+            [ 'tan',     [        3 ],     'tan',   12 ],
+            [ 'tan',     [     M_PI ],     'tan',   12 ],
+            [ 'tan',     [    -M_PI ],     'tan',   12 ],
+            [ 'tanh',    [        3 ],    'tanh',   12 ],
+            [ 'tanh',    [     M_PI ],    'tanh',   12 ],
+            [ 'tanh',    [    -M_PI ],    'tanh',   12 ],
+            [ 'max',     [     1, 2 ],     'max', null ],
+            [ 'max',     [  1, 7, 2 ],     'max', null ],
+            [ 'max',     [  9, 4, 6 ],     'max', null ],
+            [ 'min',     [     7, 6 ],     'min', null ],
+            [ 'min',     [  8, 1, 9 ],     'min', null ],
+            [ 'min',     [  1, 9, 2 ],     'min', null ],
+            [ 'hypot',   [     2, 3 ],   'hypot',   12 ],
+            [ 'hypot',   [ 2.5, 3.5 ],   'hypot',   12 ],
+            [ 'hypot',   [   10, 11 ],   'hypot',   12 ],
+            [ 'log',     [        1 ],     'log',   12 ],
+            [ 'log',     [        2 ],     'log',   12 ],
+            [ 'log',     [       10 ],     'log',   12 ],
+            [ 'log',     [     0, 2 ],     'log',   12 ],
+            [ 'log',     [     8, 2 ],     'log',   12 ],
+            [ 'log',     [  100, 10 ],     'log',   12 ],
+            [ 'mod',     [ 2.5, 3.5 ],    'fmod',   12 ],
+            [ 'mod',     [ 118, 7.5 ],    'fmod',   12 ],
+            [ 'mod',     [ 2.5, 3.7 ],    'fmod',   12 ],
+            [ 'mod',     [    18, 7 ], fn ($x, $y) => $x % $y, null ],
+            [ 'mod',     [   100, 9 ], fn ($x, $y) => $x % $y, null ],
+            [ 'mod',     [   50, 25 ], fn ($x, $y) => $x % $y, null ],
+            [ 'round',   [        2 ],   'round', null ],
+            [ 'round',   [      5.0 ],   'round', null ],
+            [ 'round',   [   7.8954 ],   'round', null ],
+            [ 'round',   [   9.9999 ],   'round', null ],
+            [ 'round',   [  18.0032 ],   'round', null ],
+            [ 'round',   [ 5.091, 2 ],   'round', null ],
+            [ 'round',   [ 5.099, 2 ],   'round', null ],
+            [ 'round',   [ 0.793, 1 ],   'round', null ],
+            [ 'round',   [ 0.223, 3 ],   'round', null ],
+            [ 'rt',      [     2, 2 ], fn ($x, $y) => pow($x, fdiv(1., $y)), 12 ],
+            [ 'rt',      [     8, 3 ], fn ($x, $y) => pow($x, fdiv(1., $y)), 12 ],
+            [ 'rt',      [    27, 3 ], fn ($x, $y) => pow($x, fdiv(1., $y)), 12 ],
+            [ 'rt',      [ 5.656, 3 ], fn ($x, $y) => pow($x, fdiv(1., $y)), 12 ],
         ];
     }
 }

@@ -1,14 +1,15 @@
 language: php
 php:
-  - 8.0
+  - 8.1
+  - 8.2
 
 env:
   global:
     - XDEBUG_MODE=coverage
 
 install:
-  - wget -O phpunit.phar https://phar.phpunit.de/phpunit-9.5.phar
-  - wget -O php-coveralls.phar https://github.com/php-coveralls/php-coveralls/releases/download/v2.4.3/php-coveralls.phar
+  - wget -O phpunit.phar https://phar.phpunit.de/phpunit-10.phar
+  - wget -O php-coveralls.phar https://github.com/php-coveralls/php-coveralls/releases/download/v2.5.3/php-coveralls.phar
 
 script:
   - mkdir -p build/logs

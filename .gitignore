@@ -8,3 +8,5 @@ index.php
 *.phar
 build/
 *.cache
+html/
+latex/

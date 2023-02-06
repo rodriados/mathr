@@ -125,6 +125,24 @@ class Token implements TokenInterface
     }
 
     /**
+     * Exports a token's components for serialization.
+     * @return array The token's internal components.
+     */
+    public function __serialize(): array
+    {
+        return [ $this->type, $this->data ];
+    }
+
+    /**
+     * Unserializes a token from its internal component parts.
+     * @param array $data The token's components to unserialize from.
+     */
+    public function __unserialize(array $data): void
+    {
+        [ $this->type, $this->data ] = $data;
+    }
+
+    /**
      * Returns the token data.
      * @return string The token's data as a string.
      */

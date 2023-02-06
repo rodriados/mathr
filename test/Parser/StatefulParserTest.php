@@ -12,6 +12,7 @@ use Mathr\Interperter\Parser\StatefulParser;
 use Mathr\Contracts\Interperter\ParserException;
 use Mathr\Contracts\Interperter\ParserInterface;
 use Mathr\Interperter\Tokenizer\DefaultTokenizer;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -49,14 +50,13 @@ final class StatefulParserTest extends TestCase
      * Tests whether a expressions can be parsed.
      * @param string $expression The expression to be parsed.
      * @param array $expected The expected parsed tokens.
-     * @dataProvider provideExpressions
      * @since 3.0
      */
+    #[DataProvider("provideExpressions")]
     public function testIfParsesExpressions(string $expression, array $expected)
     {
-        /** @var TokenListExpressionBuilderMock $expression */
-        $expression = $this->parser->runParser($expression);
-        $tokenList = $expression->getRaw();
+        $expressionMock = $this->parser->runParser($expression);
+        $tokenList = $expressionMock->getRaw();
 
         $this->assertSameSize($expected, $tokenList);
 
@@ -145,9 +145,9 @@ final class StatefulParserTest extends TestCase
     /**
      * Tests whether invalid expressions can be detected.
      * @param string $expression The invalid expression.
-     * @dataProvider provideInvalidExpressions
      * @since 3.0
      */
+    #[DataProvider("provideInvalidExpressions")]
     public function testIfDetectsInvalidExpressions(string $expression)
     {
         $this->expectException(ParserException::class);
@@ -175,9 +175,9 @@ final class StatefulParserTest extends TestCase
     /**
      * Tests whether mismatched pair nodes can be detected.
      * @param string $expression The mismatched expression.
-     * @dataProvider provideMismatchedExpressions
      * @since 3.0
      */
+    #[DataProvider("provideMismatchedExpressions")]
     public function testIfDetectsMismatches(string $expression)
     {
         $this->expectException(ParserException::class);

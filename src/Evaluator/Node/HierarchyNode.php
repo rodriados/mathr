@@ -32,6 +32,26 @@ abstract class HierarchyNode extends Node
     }
 
     /**
+     * Exports a node's components for serialization.
+     * @return array The node's internal components.
+     */
+    public function __serialize(): array
+    {
+        $token = $this->token->serialize();
+        return [ $token, $this->hierarchy ];
+    }
+
+    /**
+     * Unserializes a node from its internal component parts.
+     * @param array $data The node's components to unserialize from.
+     */
+    public function __unserialize(array $data): void
+    {
+        [ $token, $this->hierarchy ] = $data;
+        parent::unserialize($token);
+    }
+
+    /**
      * Gives access to the node's hierarchy.
      * @return NodeInterface[] The node's hierarchical children.
      */

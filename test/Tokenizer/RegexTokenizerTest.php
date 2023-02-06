@@ -10,6 +10,7 @@
 use Mathr\Interperter\Token;
 use Mathr\Interperter\Tokenizer\RegexTokenizer;
 use Mathr\Contracts\Interperter\TokenizerInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -47,9 +48,9 @@ class RegexTokenizerTest extends TestCase
      * Checks whether all token types can be correctly parsed.
      * @param string $token The single token expression to be tested.
      * @param int $type The expected token type.
-     * @dataProvider provideTokenTypes
      * @since 3.0
      */
+    #[DataProvider("provideTokenTypes")]
     public function testForCorrectTokenTypes(string $token, int $type)
     {
         $tokenList = $this->tokenizer->runTokenizer($token);
@@ -87,9 +88,9 @@ class RegexTokenizerTest extends TestCase
      * Checks whether a whole expression produces the correct list of tokens.
      * @param string $expression The expression to be tokenized.
      * @param array $expected The expression's expected tokens.
-     * @dataProvider provideExpressions
      * @since 3.0
      */
+    #[DataProvider("provideExpressions")]
     public function testIfExpressionCanBeTokenized(string $expression, array $expected)
     {
         $tokenList = $this->tokenizer->runTokenizer($expression);

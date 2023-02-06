@@ -47,6 +47,24 @@ class ScopeMemory extends Memory implements MemoryStackInterface, Serializable
     }
 
     /**
+     * Exports the contents of the memory for serialization.
+     * @return array The exported memory's contents.
+     */
+    public function __serialize(): array
+    {
+        return [ $this->mapping, $this->maxDepth ];
+    }
+
+    /**
+     * Unserializes a memory from its contents.
+     * @param array $data The memory's contents.
+     */
+    public function __unserialize(array $data): void
+    {
+        [ $this->mapping, $this->maxDepth ] = $data;
+    }
+
+    /**
      * Retrieves a function or variable from the memory.
      * @param StorableNodeInterface $node The node to retrieve the contents of.
      * @return mixed The value bound to the requested node id.
